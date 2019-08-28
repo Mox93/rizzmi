@@ -1,5 +1,6 @@
 .idea/*
-rizzmi_env/*
+.rizzmi_env/*
 data/*
 /**/__pycache__/*
+x/*
 

@@ -1,3 +1,28 @@
-from flask_sqlalchemy import SQLAlchemy
+from flask_mongoengine import MongoEngine
 
-db = SQLAlchemy()
+db = MongoEngine()
+
+
+# DB configuration values
+
+DB_NAME = "rizzmi"
+PORT = 27017
+HOST = "localhost"
+
+
+# Metadata defaults
+
+DTYPES = {"bool": db.BooleanField,
+          "datetime": db.DateTimeField,
+          "dict": db.DictField,
+          "dynamic": db.DynamicField,
+          "float": db.FloatField,
+          "int": db.IntField,
+          "list": db.ListField,
+          "str": db.StringField,}
+
+ACCEPT_MAX_LEN = ["str", "list"]
+ACCEPT_MIN_LEN = ["str"]
+ACCEPT_MIN_VAL = ["int", "float"]
+ACCEPT_MAX_VAL = ["int", "float"]
+
