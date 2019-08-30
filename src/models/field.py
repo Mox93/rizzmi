@@ -28,13 +28,17 @@ class FieldModel(db.Document):
     min_value = db.DynamicField()
     max_value = db.DynamicField()
 
+    EmbeddedFieldModel = None
+
     def __init__(self, *args, **kwargs):
         super(FieldModel, self).__init__(*args, **kwargs)
 
     def clean(self):
         """
-        Ensures that only data types which accept max/min_length/value have them and
-        that min is always less than max
+        * Ensures that only data types which accept max/min_length/value have them and
+        that min is always less than max.
+        * Converts db_field to lowercase.
+        * Assignees a titled version of db_field to displayed_text if nothing is assigned to it.
         """
         if self.data_type not in ACCEPT_MAX_LEN and self.max_length is not None:
             msg = f"The data_type '{self.data_type}' can't have a maximum length!"
@@ -74,5 +78,27 @@ class FieldModel(db.Document):
         del result["_id"]
         return result
 
-
+    @classmethod
+    def as_embedded(cls, *args, **kwargs):
+        if not cls.EmbeddedFieldModel:
+            cls.EmbeddedFieldModel = type("EmbeddedFieldModel", (db.EmbeddedDocument,),
+                                     {"db_field": cls.db_field,
+                                      "displayed_text": cls.displayed_text,
+                                      "data_type": cls.data_type,
+                                      "required": cls.required,
+                                      "unique": cls.unique,
+                                      "unique_with": cls.unique_with,
+                                      "primary_key": cls.primary_key,
+                                      "choices": cls.choices,
+                                      "help_text": cls.help_text,
+                                      "max_length": cls.max_length,
+                                      "min_length": cls.min_length,
+                                      "min_value": cls.min_value,
+                                      "max_value": cls.max_value,
+                                      "clean": cls.clean,
+                                      "find_by_name": cls.find_by_name,
+                                      "json": cls.json})
+        if args or kwargs:
+            return cls.EmbeddedFieldModel(*args, **kwargs)
+        return cls.EmbeddedFieldModel
 
