@@ -18,20 +18,29 @@ import os
 app.secret_key = os.urandom(24)
 
 
-from common.db import db, DB_NAME, PORT, HOST
+from common.db import DB_NAME, PORT, HOST
 
-app.config["MONGODB_DB"] = DB_NAME
-app.config["MONGODB_PORT"] = PORT
-app.config["MONGODB_HOST"] = HOST
+if "MONGODB_URI" in os.environ:
+    app.config['MONGODB_SETTINGS'] = {'db': DB_NAME,
+                                      'host': os.environ["MONGODB_URI"]}
+else:
+    app.config["MONGODB_DB"] = DB_NAME
+    app.config["MONGODB_PORT"] = PORT
+    app.config["MONGODB_HOST"] = HOST
+
+
+from common.db import db
 
 db.init_app(app)
 
+try:
+    # TODO should use environment values
+    from x.recaptcha import RECAPCHA_SITE_KEY, RECAPCHA_SECRET_KEY
 
-# TODO should use environment values
-from x.recaptcha import SITE_KEY, SECRET_KEY
-
-app.config["RECAPTCHA_PUBLIC_KEY"] = SITE_KEY
-app.config["RECAPTCHA_PRIVATE_KEY"] = SECRET_KEY
+    app.config["RECAPTCHA_PUBLIC_KEY"] = os.environ.get("RECAPCHA_SITE_KEY", RECAPCHA_SITE_KEY)
+    app.config["RECAPTCHA_PRIVATE_KEY"] = os.environ.get("RECAPCHA_SECRET_KEY", RECAPCHA_SECRET_KEY)
+except:
+    pass
 
 
 from api import api_bp
