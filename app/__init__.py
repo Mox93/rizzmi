@@ -28,10 +28,10 @@ db.init_app(app)
 
 
 # TODO should use environment values
-from x.recaptcha import SITE_KEY, SECRET_KEY
+from x.recaptcha import RECAPTCHA_SITE_KEY, RECAPTCHA_SECRET_KEY
 
-app.config["RECAPTCHA_PUBLIC_KEY"] = SITE_KEY
-app.config["RECAPTCHA_PRIVATE_KEY"] = SECRET_KEY
+app.config["RECAPTCHA_PUBLIC_KEY"] = RECAPTCHA_SITE_KEY
+app.config["RECAPTCHA_PRIVATE_KEY"] = RECAPTCHA_SECRET_KEY
 
 
 # from api import api_bp
