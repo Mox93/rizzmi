@@ -1,5 +1,5 @@
 from werkzeug.security import safe_str_cmp
-from models.admin import AdminModel
+from models.developer import AdminModel
 
 
 def authenticate(phone_no, password):
