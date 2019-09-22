@@ -1,0 +1,13 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+    Rizzmi
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="color:green;"> Welcome to Rizzmi! </h1>
+    <p>This website is still under construction.</p>
+    <p>If you are part of the development team you can <a href="{{ url_for('site.dev_login') }}">Log In</a> here.</p>
+</div>
+{% endblock %}

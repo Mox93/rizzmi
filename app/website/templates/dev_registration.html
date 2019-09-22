@@ -1,0 +1,22 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+    Developer Registration
+{% endblock %}
+
+{% block content%}
+    <div class="container">
+        <form method="post" action="{{ url_for('site.dev_register') }}">
+            <h2 style="color:green;">Developer Registration</h2>
+            <dl>
+                {{ wtf.quick_form(form) }}
+                <input class="btn btn-success" type="submit" value="Register">
+            </dl>
+        </form>
+        <p style="color:gray;">
+            <br>
+            Already have an account? <a href="{{ url_for('site.dev_login') }}">Login</a> here.
+        </p>
+    </div>
+{% endblock %}

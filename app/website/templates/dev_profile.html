@@ -1,0 +1,18 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+    {{ current_user.username }}
+{% endblock %}
+
+{% block content%}
+    <div class="container">
+        <h1 style="color:green;">Welcome {{ current_user.username }}!</h1>
+        <form action="{{ url_for('site.dev_home') }}">
+            <input class="btn btn-primary" type="submit" value="Home" />
+        </form>
+        <br>
+        <form action="{{ url_for('site.dev_logout') }}">
+            <input class="btn btn-secondary" type="submit" value="Log Out" />
+        </form>
+    </div>
+{% endblock %}
