@@ -34,9 +34,9 @@ app.config["RECAPTCHA_PUBLIC_KEY"] = SITE_KEY
 app.config["RECAPTCHA_PRIVATE_KEY"] = SECRET_KEY
 
 
-from api import api_bp
+# from api import api_bp
 from website import site_bp
 
-app.register_blueprint(api_bp, url_prefix="/api")
+# app.register_blueprint(api_bp, url_prefix="/api")
 app.register_blueprint(site_bp)
 
