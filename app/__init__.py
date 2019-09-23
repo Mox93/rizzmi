@@ -12,7 +12,7 @@ app.config["DEBUG"] = True
 app.config["TESTING"] = True
 # app.config["USE_SESSION_FOR_NEXT"] = True
 
-print("app line 15")
+print(">>> app line 15")
 import os
 
 app.secret_key = os.urandom(24)
@@ -27,7 +27,7 @@ else:
     app.config["MONGODB_DB"] = DB_NAME
     app.config["MONGODB_PORT"] = PORT
     app.config["MONGODB_HOST"] = HOST
-print("app line 30")
+print(">>> app line 30")
 
 from common.db import db
 
@@ -42,11 +42,11 @@ try:
 except:
     pass
 
-print("app line 45")
+print(">>> app line 45")
 from api import api_bp
 from website import site_bp
 
 app.register_blueprint(api_bp, url_prefix="/api")
 app.register_blueprint(site_bp)
 
-print("app line 52")
+print(">>> app line 52")
