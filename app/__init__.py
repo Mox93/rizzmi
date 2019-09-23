@@ -23,10 +23,10 @@ app.config["RECAPTCHA_PRIVATE_KEY"] = os.environ["RECAPTCHA_SECRET_KEY"]
 
 from common.db import DB_NAME, PORT, HOST
 
-if "MONGOLAB_TEAL_URI" in os.environ:
-    print(">>> MONGOLAB_TEAL_URI was found")
+if "MONGOLAB_MAROON_URI" in os.environ:
+    print(">>> MONGOLAB_MAROON_URI was found")
     app.config['MONGODB_SETTINGS'] = {'db': DB_NAME,
-                                      'host': os.environ["MONGOLAB_TEAL_URI"]}
+                                      'host': os.environ["MONGOLAB_MAROON_URI"]}
 else:
     app.config["MONGODB_DB"] = DB_NAME
     app.config["MONGODB_PORT"] = PORT
