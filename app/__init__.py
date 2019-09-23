@@ -20,9 +20,9 @@ app.secret_key = os.urandom(24)
 
 from common.db import DB_NAME, PORT, HOST
 
-if "MONGODB_URI" in os.environ:
+if "MONGOLAB_TEAL_URI" in os.environ:
     app.config['MONGODB_SETTINGS'] = {'db': DB_NAME,
-                                      'host': os.environ["MONGOLAB_TEAL"]}
+                                      'host': os.environ["MONGOLAB_TEAL_URI"]}
 else:
     app.config["MONGODB_DB"] = DB_NAME
     app.config["MONGODB_PORT"] = PORT
