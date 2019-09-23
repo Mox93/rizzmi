@@ -20,7 +20,9 @@ def load_user(user_id):
 
 
 def unique(form, field):
+    print(">>> Check for uniqueness")
     user = DeveloperModel.find_by_(field.id, field.data)
+    print(">>> Check was successful")
     if user:
         raise ValidationError(f"'{field.data}' already exists.")
 
@@ -57,6 +59,7 @@ def dev_register():
     form = DevRegisterForm()
 
     if form.validate_on_submit():
+        print(f">>> Register Form Valid")
         hashed_password = generate_password_hash(form.password.data, method="sha256")
         # noinspection PyArgumentList
         new_user = DeveloperModel(username=form.username.data,
@@ -70,7 +73,7 @@ def dev_register():
 
         login_user(new_user, remember=False)
         return redirect(url_for("site.dev_profile"))
-
+    print(f">>> Register Form Invalid")
     return render_template("dev_registration.html", form=form)
 
 
@@ -80,6 +83,7 @@ def dev_login():
     form = DevLoginForm()
 
     if form.validate_on_submit():
+        print(f">>> Login Form Valid")
         user = DeveloperModel.find_by_username(form.username.data)
 
         if user and check_password_hash(user.password, form.password.data):
@@ -93,7 +97,7 @@ def dev_login():
             return redirect(url_for("site.dev_profile"))
         else:
             return render_template("dev_login.html", form=form, error_msg="Wrong Username or Password!")
-
+    print(f">>> Login Form Invalid")
     return render_template("dev_login.html", form=form)
 
 

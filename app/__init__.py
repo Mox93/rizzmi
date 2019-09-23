@@ -17,10 +17,14 @@ import os
 
 app.secret_key = os.urandom(24)
 
+app.config["RECAPTCHA_PUBLIC_KEY"] = os.environ["RECAPTCHA_SITE_KEY"]
+app.config["RECAPTCHA_PRIVATE_KEY"] = os.environ["RECAPTCHA_SECRET_KEY"]
+
 
 from common.db import DB_NAME, PORT, HOST
 
 if "MONGOLAB_TEAL_URI" in os.environ:
+    print(">>> MONGOLAB_TEAL_URI was found")
     app.config['MONGODB_SETTINGS'] = {'db': DB_NAME,
                                       'host': os.environ["MONGOLAB_TEAL_URI"]}
 else:
@@ -32,11 +36,6 @@ else:
 from common.db import db
 
 db.init_app(app)
-
-
-if "RECAPTCHA_SITE_KEY" in os.environ and "RECAPTCHA_SECRET_KEY" in os.environ:
-    app.config["RECAPTCHA_PUBLIC_KEY"] = os.environ["RECAPTCHA_SITE_KEY"]
-    app.config["RECAPTCHA_PRIVATE_KEY"] = os.environ["RECAPTCHA_SECRET_KEY"]
 
 
 from api import api_bp
