@@ -77,7 +77,7 @@ class FieldModel(ExtendedDocument):
         if not cls._embedded:
 
             cls._embedded = type("EmbeddedFieldModel", (db.EmbeddedDocument,),
-                                 {"_id": db.ObjectIdField(default=ObjectId),
+                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId),
                                   "name": db.StringField(required=True, max_length=50),  # cls.name,
                                   "displayed_text": cls.displayed_text,
                                   "data_type": cls.data_type,

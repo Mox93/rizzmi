@@ -1,0 +1,52 @@
+from functools import wraps
+from flask import Blueprint, redirect, url_for
+from flask_admin import Admin
+from flask_admin.contrib.mongoengine import ModelView
+from flask_login import current_user
+from wtforms.validators import ValidationError
+from models.developer import DeveloperModel
+from models.form import FormModel
+from models.field import FieldModel
+from app import app
+
+
+class ExtendedModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for("dev.login"))
+
+
+dev_bp = Blueprint("dev", __name__, template_folder="templates")
+
+
+def unique(form, field):
+    user = DeveloperModel.find_by(field.id, field.data)
+    if user:
+        raise ValidationError(f"'{field.data}' already exists.")
+
+
+def redirect_auth_user_to(endpoint):
+    def auth_user_check(func):
+        @wraps(func)
+        def func_wrapper(*args, **kwargs):
+            if current_user.is_authenticated:
+                return redirect(url_for(endpoint))
+            return func(*args, **kwargs)
+        return func_wrapper
+    return auth_user_check
+
+
+from developer.views import registration
+from developer.views import login
+from developer.views.profile import DevProfileView
+from developer.views.homepage import DevHomeView
+
+admin = Admin(app, name="Developer", template_mode='bootstrap3',
+              index_view=DevHomeView(url="/dev", template="dev/homepage.html"))
+
+admin.add_view(ExtendedModelView(FormModel, name="Forms", endpoint="forms"))
+admin.add_view(ExtendedModelView(FieldModel, name="Fields", endpoint="fields"))
+admin.add_view(DevProfileView(name="Profile", endpoint="profile"))
+

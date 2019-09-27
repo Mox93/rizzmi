@@ -1,5 +1,6 @@
 from common.db import db, ExtendedDocument
 from flask_login import UserMixin
+from bson import ObjectId
 
 
 class DeveloperModel(UserMixin, ExtendedDocument):
@@ -8,8 +9,15 @@ class DeveloperModel(UserMixin, ExtendedDocument):
     username = db.StringField(required=True, max_length=25, unique=True)
     email = db.EmailField(required=True, unique=True)
     password = db.StringField(required=True, max_length=80)
+    session_id = db.ObjectIdField(unique=True, defult=ObjectId)
+
+    def get_id(self):
+        return str(self.session_id)
 
     def clean(self):
+        if not self.session_id:
+            self.session_id = ObjectId()
+
         if isinstance(self.username, str):
             self.username = self.username.lower()
 
