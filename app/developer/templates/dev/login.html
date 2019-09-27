@@ -7,8 +7,8 @@
 
 {% block content%}
     <div class="container">
-        <form method="post" action="{{ url_for('site.dev_login') }}">
-            <h2 style="color:green;">Developer Login</h2>
+        <form method="post" action="{{ url_for('dev.login') }}">
+            <h2 style="color:green;"> Developer Login </h2>
             <p style="color:red;"> {{ error_msg }} </p>
             <dl>
                 {{ wtf.quick_form(form) }}
@@ -18,7 +18,7 @@
 
         <p style="color:gray;">
             <br>
-            Don't have an account yet? <a href="{{ url_for('site.dev_register') }}">Register</a> now.
+            Don't have an account yet? <a href="{{ url_for('dev.register') }}">Register</a> now.
         </p>
     </div>
 {% endblock %}

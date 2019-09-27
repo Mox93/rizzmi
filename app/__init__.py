@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+from models.developer import DeveloperModel
+
 
 app = Flask(__name__)
 
@@ -8,9 +10,17 @@ Bootstrap(app)
 
 login_manager = LoginManager(app)
 
+login_manager.login_view = "dev.login"
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    user = DeveloperModel.find_by("session_id", user_id)
+    return user
+
+
 app.config["DEBUG"] = True
 app.config["TESTING"] = True
-# app.config["USE_SESSION_FOR_NEXT"] = True
 
 
 import os
@@ -36,7 +46,9 @@ app.config["RECAPTCHA_PRIVATE_KEY"] = RECAPTCHA_SECRET_KEY
 
 # from api import api_bp
 from website import site_bp
+from developer import dev_bp
 
 # app.register_blueprint(api_bp, url_prefix="/api")
 app.register_blueprint(site_bp)
+app.register_blueprint(dev_bp, url_prefix="/dev")
 

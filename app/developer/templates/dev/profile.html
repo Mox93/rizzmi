@@ -1,0 +1,15 @@
+{% extends "admin/master.html" %}
+
+{% block title %}
+    {{ current_user.username }}
+{% endblock %}
+
+{% block body%}
+    <div class="container">
+        <h1 style="color:green;"> Welcome {{ current_user.username }}!</h1>
+        <br>
+        <form action="{{ url_for('dev.logout') }}">
+            <input class="btn btn-secondary" type="submit" value="Log Out" />
+        </form>
+    </div>
+{% endblock %}
