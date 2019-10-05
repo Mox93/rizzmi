@@ -68,7 +68,7 @@
                            name="title">
                     <label for="element-name" class="sr-only">Description</label>
                     <input type="text" class="form-control-plaintext" id="element-des" placeholder="Description..."
-                           value="{{ element.description }}" name="description">
+                           {% if element.description %} value="{{ element.description }}" {% endif %} name="description">
                 </div>
             </form>
         </div>

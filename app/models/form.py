@@ -19,6 +19,7 @@ class SectionModel(ExtendedDocument):
     """
     meta = {'collection': 'sections'}
 
+    name = db.StringField(required=True, max_length=50, default="Untitled Section")
     title = db.StringField(required=True, max_length=500, default="Untitled Section")
     description = db.StringField()
     fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
@@ -50,7 +51,7 @@ class FormModel(ExtendedDocument):
 
     # TODO divide the Form into sections
 
-    name = db.StringField(required=True, max_length=50, default="Unnamed Form")
+    name = db.StringField(required=True, max_length=50, default="Untitled Form")
     title = db.StringField(required=True, max_length=500, default="Untitled Form")
     description = db.StringField()
     fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
@@ -61,7 +62,9 @@ class FormModel(ExtendedDocument):
         """
         * Trims off name to its maximum length
         """
-        # TODO need to catch when name and title are empty stings
-        if self.name:
-            self.name = self.name[:50]
+
+        self.name = self.name[:50] or "Untitled Form"
+        self.title = self.title[:500] or self.name
+
+
 
