@@ -49,7 +49,10 @@ class ExtendedDocument(db.Document):
 
     @classmethod
     def find_all(cls):
-        return cls.objects()
+        try:
+            return cls.objects()
+        except:
+            return []
 
 
 class ExtendedEmbeddedDocument(db.EmbeddedDocument):
@@ -98,7 +101,10 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
 
     @classmethod
     def find_all(cls):
-        return cls.objects()
+        try:
+            return cls.objects()
+        except:
+            return []
 
 
 # DB Configuration Values
