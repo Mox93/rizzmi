@@ -1,22 +1,49 @@
-{% extends "bootstrap/base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}
-    Developer Registration
-{% endblock %}
+<!DOCTYPE html>
 
-{% block content%}
-    <div class="container" style="width: 35rem;">
-        <form method="post" action="{{ url_for('dev.register') }}">
-            <h2 style="color:green;"> Developer Registration </h2>
-            <dl>
-                {{ wtf.quick_form(form) }}
-                <input class="btn btn-success" type="submit" value="Register">
-            </dl>
-        </form>
-        <p style="color:gray;">
-            <br>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+
+    <title> Rizzmi Team Register </title>
+</head>
+
+<body>
+
+    <div class="card my-5 mx-auto" style="max-width: 25rem;">
+        <h3 class="card-header text-center text-white", style="background-color: green;">
+            Rizzni Team Register
+        </h3>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('dev.register') }}">
+                <dl>
+                    {{ wtf.quick_form(form) }}
+                    <input class="btn text-white" style="background-color: green;" type="submit" value="Register">
+                </dl>
+            </form>
+        </div>
+        <div class="card-footer text-muted">
             Already have an account? <a href="{{ url_for('dev.login') }}">Login</a> here.
-        </p>
+        </div>
     </div>
-{% endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+
+</body>
+</html>
+
