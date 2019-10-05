@@ -16,16 +16,20 @@ class ExtendedDocument(db.Document):
         if result.get("_id", None):
             result["_id"] = str(result["_id"])
 
+        if result.get("id", None):
+            result["_id"] = str(result["id"])
+            del result["id"]
+
         for key in result:
             try:
                 if isinstance(self[key], db.EmbeddedDocument):
-                    result[key] = str(result[key].get("_id", "")) or None
+                    result[key]["_id"] = str(result[key].get("_id", "")) or None
                 elif isinstance(self[key], list):
                     for item in result[key]:
                         item["_id"] = str(item.get("_id", "")) or None
             except KeyError as e:
-                pass
-                # print(self, e)
+                # pass
+                print(self, e)
 
         return result
 
@@ -38,7 +42,59 @@ class ExtendedDocument(db.Document):
 
     @classmethod
     def find_by(cls, field_name, value):
-        return cls.objects(**{field_name: value}).first()
+        try:
+            return cls.objects(**{field_name: value}).first()
+        except:
+            return
+
+    @classmethod
+    def find_all(cls):
+        return cls.objects()
+
+
+class ExtendedEmbeddedDocument(db.EmbeddedDocument):
+    meta = {"abstract": True}
+
+    def json(self, exclude=tuple()):
+        result = self.to_mongo()
+
+        for key in exclude:
+            if key in result:
+                del result[key]
+
+        if result.get("_id", None):
+            result["_id"] = str(result["_id"])
+
+        if result.get("id", None):
+            result["_id"] = str(result["id"])
+            del result["id"]
+
+        for key in result:
+            try:
+                if isinstance(self[key], db.EmbeddedDocument):
+                    result[key]["_id"] = str(result[key].get("_id", "")) or None
+                elif isinstance(self[key], list):
+                    for item in result[key]:
+                        item["_id"] = str(item.get("_id", "")) or None
+            except KeyError as e:
+                # pass
+                print(self, e)
+
+        return result
+
+    @classmethod
+    def find_by_id(cls, _id):
+        try:
+            return cls.objects(id=_id).first()
+        except:
+            return
+
+    @classmethod
+    def find_by(cls, field_name, value):
+        try:
+            return cls.objects(**{field_name: value}).first()
+        except:
+            return
 
     @classmethod
     def find_all(cls):

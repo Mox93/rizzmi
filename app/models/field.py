@@ -1,6 +1,6 @@
 from bson import ObjectId
-from common.db import (db, ExtendedDocument, DTYPES, ACCEPT_MAX_LEN,
-                       ACCEPT_MIN_LEN, ACCEPT_MIN_VAL, ACCEPT_MAX_VAL)
+from common.db import (db, ExtendedDocument, ExtendedEmbeddedDocument,
+                       DTYPES, ACCEPT_MAX_LEN, ACCEPT_MIN_LEN, ACCEPT_MIN_VAL, ACCEPT_MAX_VAL)
 
 
 class FieldModel(ExtendedDocument):
@@ -65,7 +65,7 @@ class FieldModel(ExtendedDocument):
 
         if isinstance(self.name, str):
             self.name = self.name.lower()
-            if self.displayed_text is None:
+            if not self.displayed_text:
                 self.displayed_text = " ".join(self.name.split("_")).title()
 
     @classmethod
@@ -76,9 +76,9 @@ class FieldModel(ExtendedDocument):
     def as_embedded(cls, *args, **kwargs):
         if not cls._embedded:
 
-            cls._embedded = type("EmbeddedFieldModel", (db.EmbeddedDocument,),
-                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId),
-                                  "name": db.StringField(required=True, max_length=50),  # cls.name,
+            cls._embedded = type("EmbeddedFieldModel", (ExtendedEmbeddedDocument,),
+                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId, sparse=True),
+                                  "name": db.StringField(required=True, max_length=50),
                                   "displayed_text": cls.displayed_text,
                                   "data_type": cls.data_type,
                                   "required": cls.required,
@@ -92,9 +92,7 @@ class FieldModel(ExtendedDocument):
                                   "min_value": cls.min_value,
                                   "max_value": cls.max_value,
                                   "clean": cls.clean,
-                                  "find_by_id": cls.find_by_id,
-                                  "find_by_name": cls.find_by_name,
-                                  "json": cls.json})
+                                  "find_by_name": cls.find_by_name})
         if args or kwargs:
             return cls._embedded(*args, **kwargs)
         return cls._embedded

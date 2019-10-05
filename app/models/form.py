@@ -1,7 +1,44 @@
+from bson import ObjectId
 from common.db import db, ExtendedDocument
-from common.util import ENDPOINT_MAP
-from models.field import EmbeddedFieldModel
-# from api.resources.entry import EntryFactory
+from models.field import EmbeddedFieldModel, ExtendedEmbeddedDocument
+
+
+class Connection(ExtendedEmbeddedDocument):
+    """
+    ...
+    """
+    collection = db.StringField(max_length=50)
+
+    def __repr__(self):
+        return self.collection
+
+
+class SectionModel(ExtendedDocument):
+    """
+    ...
+    """
+    meta = {'collection': 'sections'}
+
+    title = db.StringField(required=True, max_length=500, default="Untitled Section")
+    description = db.StringField()
+    fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
+    db_connection = db.EmbeddedDocumentField(Connection)
+
+    # Embedded Document Version
+    _embedded = None
+
+    @classmethod
+    def as_embedded(cls, *args, **kwargs):
+        if not cls._embedded:
+            cls._embedded = type("EmbeddedSectionModel", (ExtendedEmbeddedDocument,),
+                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId, sparse=True),
+                                  "title": cls.title,
+                                  "description": cls.description,
+                                  "fields": cls.fields,
+                                  "db_connection": cls.db_connection})
+        if args or kwargs:
+            return cls._embedded(*args, **kwargs)
+        return cls._embedded
 
 
 class FormModel(ExtendedDocument):
@@ -13,32 +50,18 @@ class FormModel(ExtendedDocument):
 
     # TODO divide the Form into sections
 
-    name = db.StringField(required=True, max_length=50, unique=True)
-    title = db.StringField(required=True, max_length=100)
-    fields = db.EmbeddedDocumentListField(EmbeddedFieldModel, required=True)
-    description = db.StringField(max_length=500)
+    name = db.StringField(required=True, max_length=50, default="Unnamed Form")
+    title = db.StringField(required=True, max_length=500, default="Untitled Form")
+    description = db.StringField()
+    fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
+    sections = db.EmbeddedDocumentListField(SectionModel.as_embedded())
+    db_connection = db.EmbeddedDocumentField(Connection)
 
     def clean(self):
         """
-        * Ensures that only ...
+        * Trims off name to its maximum length
         """
-        # TODO might need to convert from title to name as well
+        # TODO need to catch when name and title are empty stings
         if self.name:
-            self.name = self.name.lower()
-            if not self.title:
-                self.title = " ".join(self.name.split("_")).title()
-
-    @classmethod
-    def find_by_name(cls, name):
-        return cls.objects(name=name.lower()).first()
-
-
-# form = FormModel("registration")
-# field = EmbeddedFieldModel(db_field="first_name")
-#
-# form.fields.append(field)
-#
-# print(form.fields)
-# print(field)
-# form.save()
+            self.name = self.name[:50]
 
