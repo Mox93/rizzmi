@@ -1,24 +1,32 @@
 from functools import wraps
 from flask import Blueprint, redirect, url_for
 from flask_admin import Admin
+from flask_admin.menu import MenuLink
 from flask_admin.contrib.mongoengine import ModelView
 from flask_login import current_user
 from wtforms.validators import ValidationError
 from models.developer import DeveloperModel
-from models.form import FormModel
+from models.form import FormModel, SectionModel
 from models.field import FieldModel
 from app import app
 
 
 class ExtendedModelView(ModelView):
+    # create_modal = True
+    # edit_modal = True
+    can_export = True
+
+    # column_searchable_list = ['name']
+
+    create_template = 'dev/extended_create.html'
+    list_template = 'dev/extended_list.html'
+    edit_template = 'dev/extended_edit.html'
+
     def is_accessible(self):
         return current_user.is_authenticated
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for("dev.login"))
-
-
-dev_bp = Blueprint("dev", __name__, template_folder="templates")
 
 
 def unique(form, field):
@@ -38,15 +46,28 @@ def redirect_auth_user_to(endpoint):
     return auth_user_check
 
 
-from developer.views import registration
-from developer.views import login
+dev_bp = Blueprint("dev", __name__, template_folder="templates")
+
+
+from developer.views import registration, login
 from developer.views.profile import DevProfileView
 from developer.views.homepage import DevHomeView
 
+# TODO figure out how to reference the urls using url_for
 admin = Admin(app, name="Developer", template_mode='bootstrap3',
               index_view=DevHomeView(url="/dev", template="dev/homepage.html"))
 
 admin.add_view(ExtendedModelView(FormModel, name="Forms", endpoint="forms"))
+admin.add_view(ExtendedModelView(SectionModel, name="Collections", endpoint="collection"))
 admin.add_view(ExtendedModelView(FieldModel, name="Fields", endpoint="fields"))
-admin.add_view(DevProfileView(name="Profile", endpoint="profile"))
+admin.add_view(DevProfileView(name="Profile", endpoint="profile", category="Go To"))
+
+admin.add_sub_category(name="Custom", parent_name="Go To")
+admin.add_link(MenuLink(name='Forms', url="/forms", category='Custom'))
+admin.add_link(MenuLink(name='Collections', url="/collections", category='Custom'))
+admin.add_link(MenuLink(name='Fields', url="/fields", category='Custom'))
+
+admin.add_sub_category(name="Action", parent_name="Go To")
+admin.add_link(MenuLink(name='Log Out', url="/dev/logout", category='Action'))
+admin.add_link(MenuLink(name='Delete Account', url="/dev/delete", category='Action'))
 

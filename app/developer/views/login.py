@@ -18,13 +18,13 @@ class DevLoginForm(FlaskForm):
 
 @dev_bp.route("/login", methods=["GET", "POST"])
 @dev_bp.route("/login/<string:bypass>", methods=["GET"])
-@redirect_auth_user_to("dev.homepage")
+@redirect_auth_user_to("admin.index")
 def login(bypass=None):
 
     if bypass == "me":
         user = DeveloperModel.find_by_username("tester_0")
         login_user(user)
-        return redirect(url_for("dev.homepage"))
+        return redirect(url_for("admin.index"))
 
     form = DevLoginForm()
 
@@ -39,7 +39,7 @@ def login(bypass=None):
             if url and is_safe_url(url):
                 return redirect(url)
 
-            return redirect(url_for("dev.homepage"))
+            return redirect(url_for("admin.index"))
         else:
             return render_template("dev/login.html", form=form, error_msg="Wrong Username or Password!")
 

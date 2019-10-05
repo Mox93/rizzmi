@@ -26,6 +26,9 @@ app.config["TESTING"] = True
 import os
 
 app.config["SECRET_KEY"] = os.urandom(24)
+# app.config["SERVER_NAME"] = "127.0.0.1:5000"
+# app.config["APPLICATION_ROOT"] = "/"
+
 
 app.config["RECAPTCHA_PUBLIC_KEY"] = os.environ["RECAPTCHA_SITE_KEY"]
 app.config["RECAPTCHA_PRIVATE_KEY"] = os.environ["RECAPTCHA_SECRET_KEY"]
