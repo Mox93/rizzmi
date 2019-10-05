@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content%}
-    <div class="container">
+    <div class="container" style="width: 33rem;">
         <form method="post" action="{{ url_for('dev.login') }}">
             <h2 style="color:green;"> Developer Login </h2>
             <p style="color:red;"> {{ error_msg }} </p>
