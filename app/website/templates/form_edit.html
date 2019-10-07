@@ -9,94 +9,155 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('site.static', filename='css/style.css') }}">
 
     <title>{{ element.name }}</title>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
-            <img src="{{ url_for('site.static', filename='assets/arrow_back.svg') }}" width="30" height="30"
-                 class="d-inline-block align-top" alt="">
-        </a>
-        <form method="post" class="form-inline" action="{{ url_for('site.form_edit', _id=element.id) }}" id="name-form">
-            <div class="form-group mb-2">
-                <label for="element-name" class="sr-only">Name</label>
-                <input type="text" class="form-control-plaintext h5" id="element-name" value="{{ element.name }}" name="name">
-            </div>
-        </form>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Preview</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Send</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Settings</a>
-                </li>
-            </ul>
-        </div>
-        <form class="form-inline">
-            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
-    </nav>
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
 
-    <div class="card my-5 mx-auto" style="max-width: 50rem;">
-        <div class="card-header">
-            <ul class="nav justify-content-center nav-tabs card-header-tabs">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">Questions</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#">Responses</a>
-                </li>
-            </ul>
+    <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
+        <img src="{{ url_for('site.static', filename='assets/arrow_back.svg') }}" width="30" height="30"
+             class="d-inline-block align-top" alt="">
+    </a>
+    <form method="post" class="form-inline" action="{{ url_for('site.form_edit', _id=element.id) }}" id="name-field">
+        <div class="form-group mb-2">
+            <label for="element-name" class="sr-only">Name</label>
+            <input type="text" class="hu-line-input form-control-plaintext h5 pb-0" id="element-name"
+                   value="{{ element.name }}" name="name">
         </div>
-        <div class="card-body">
-            <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-form">
-                <div class="form-group mb-2">
-                    <label for="element-name" class="sr-only">Title</label>
-                    <input type="text" class="form-control-plaintext h3" id="element-title" value="{{ element.title }}"
-                           name="title">
-                    <label for="element-name" class="sr-only">Description</label>
-                    <input type="text" class="form-control-plaintext" id="element-des" placeholder="Description..."
-                           {% if element.description %} value="{{ element.description }}" {% endif %} name="description">
-                </div>
-            </form>
-        </div>
+    </form>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Preview</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Send</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Settings</a>
+            </li>
+        </ul>
+    </div>
+    <form class="form-inline">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+    </form>
+
+</nav>
+
+<div class="card my-5 mx-auto" style="max-width: 50rem;">
+
+    <div class="card-header">
+        <ul class="nav justify-content-center nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Questions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Responses</a>
+            </li>
+        </ul>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
+    <div class="accordion" id="fields">
 
-    <script>
-        $(function() {
-            $("#element-name").change(function() {
-                $("#name-form").submit();
-            });
-            $("#element-title").change(function() {
-                $("#title-form").submit();
-            });
-            $("#element-des").change(function() {
-                $("#title-form").submit();
-            });
-        });
-    </script>
+        <div class="card no-sides left-mark" style="border-top: none;">
+            <div class="card-body" data-toggle="collapse" data-target="#collapse-0" aria-expanded="true"
+                 aria-controls="collapse-0">
+                <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-field">
+                    <div class="form-group mb-2">
+                        <label for="element-name" class="sr-only">Title</label>
+                        <input type="text" class="form-control-plaintext h3 u-line-input" id="element-title"
+                               value="{{ element.title }}" name="title">
+                        <label for="element-name" class="sr-only">Description</label>
+                        <input type="text" class="form-control-plaintext u-line-input" id="element-des" placeholder="Description..."
+                               {% if element.description %} value="{{ element.description }}" {% endif %} name="description">
+                    </div>
+                </form>
+            </div>
+
+            <div id="collapse-0" class="collapse show" aria-labelledby="heading-0" data-parent="#fields"></div>
+
+        </div>
+
+        {% for field in element.fields %}
+        <div class="card hide-choices no-sides left-mark">
+            <div class="card-body" id="heading-{{ loop.index }}" data-toggle="collapse" role="button"
+                 data-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
+                <form method="post" action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}"
+                      class="field-sec" id="field-{{ loop.index }}">
+                    <div class="form-row">
+                        <div class="col-md-7 driver">
+                            <label for="txt-{{ loop.index }}" class="sr-only">Question</label>
+                            <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
+                                   id="txt-{{ loop.index }}" placeholder="Question" name="displayed_text"
+                                   {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
+                                   onchange="this.form.submit()">
+                        </div>
+                        <div class="col-md-1 image-upload driven">
+                            <label for="img-{{ loop.index }}">
+                                <img src="{{ url_for('site.static', filename='assets/insert_photo.svg') }}"
+                                     width="30" height="30" class="d-inline-block align-top" alt="">
+                            </label>
+                            <input type="file" accept="image/*"  id="img-{{ loop.index }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="dtype-{{ loop.index }}" class="sr-only">Input Type</label>
+                            <select class="custom-select" id="dtype-{{ loop.index }}" name="data_type"
+                                    onchange="this.form.submit()">
+                            {% for d_type in d_types %}
+                                <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
+                                    {{ d_type }}
+                                </option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="collapse-{{ loop.index }}" class="collapse" aria-labelledby="heading-{{ loop.index }}"
+                 data-parent="#fields">
+                <div class="card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
+                    wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
+                    eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
+                    assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt
+                    sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
+                    farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
+                    labore sustainable VHS.
+                </div>
+
+                <div class="card-footer">
+                    Anim pariatur cliche reprehenderit,
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for('site.static', filename='js/app.js') }}"></script>
 
 </body>
 </html>

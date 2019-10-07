@@ -1,0 +1,41 @@
+.u-line-input {
+    border-bottom: 1px #D5D8DC solid;
+    margin-bottom: 11px;
+    outline: none;
+}
+
+.u-line-input:focus {
+    border-bottom: 2px green solid;
+    margin-bottom: 10px;
+}
+
+.hu-line-input {
+    margin-bottom: 1px;
+    outline: none;
+}
+
+.hu-line-input:focus {
+    border-bottom: 2px green solid;
+    margin-bottom: 0px;
+}
+
+.no-sides {
+    border-radius: 0;
+    border-top: 1px solid rgba(0,0,0,0.125);
+    border-right: none;
+    border-bottom: none;
+    border-left: 3px solid rgba(0,0,0,0);
+}
+
+.image-upload input{
+    display: none;
+}
+
+.image-upload label{
+    visibility:hidden;
+}
+
+.hide-choices select{
+    visibility:hidden;
+}
+

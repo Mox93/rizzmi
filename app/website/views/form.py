@@ -2,6 +2,8 @@ from flask import render_template, request, redirect, url_for, abort
 from flask_login import login_required
 from website import site_bp
 from models.form import FormModel
+from models.field import EmbeddedFieldModel
+from common.util import PY_DTYPES
 
 
 @site_bp.route("/forms", methods=["GET", "POST"])
@@ -30,14 +32,19 @@ def form_edit(_id):
     if request.method == "POST":
         form = FormModel.find_by_id(_id)
 
+        print(request.form)
+
         for field in request.form:
-            setattr(form, field, request.form[field])
+            if hasattr(form, field):
+                print(f"field = {field}")
+                setattr(form, field, request.form[field])
 
         form.save()
         return redirect(url_for("site.form_edit", _id=form.id))
 
     if _id == "new":
-        form = FormModel()
+        fields = [EmbeddedFieldModel(name="Untitled Question")]
+        form = FormModel(fields=fields)
 
         # TODO instead of saving just create an id for the from
         form.save()
@@ -46,7 +53,7 @@ def form_edit(_id):
     form = FormModel.find_by_id(_id)
 
     if form:
-        return render_template("form_edit.html", element=form)
+        return render_template("form_edit.html", element=form, d_types=PY_DTYPES.keys())
 
     abort(404)
 
@@ -63,4 +70,23 @@ def form_delete():
             form.delete()
 
     return redirect(url_for("site.form_list"))
+
+
+@site_bp.route("/forms/<string:form_id>/<string:field_id>", methods=["GET", "POST"])
+@login_required
+def form_field_edit(form_id, field_id):
+
+    if request.method == "POST":
+        form = FormModel.find_by_id(form_id)
+        field = form.find_field_by_id(field_id) if form else None
+
+        if field:
+            for prop in request.form:
+                if hasattr(field, prop):
+                    setattr(field, prop, request.form[prop])
+
+            form.save()
+            return redirect(url_for("site.form_edit", _id=form.id))
+
+    return redirect(url_for("site.form_edit", _id=form_id))
 

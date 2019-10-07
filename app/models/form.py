@@ -66,5 +66,9 @@ class FormModel(ExtendedDocument):
         self.name = self.name[:50] or "Untitled Form"
         self.title = self.title[:500] or self.name
 
-
+    def find_field_by_id(self, _id):
+        for field in self.fields:
+            if _id == str(field._id):
+                return field
+        return
 
