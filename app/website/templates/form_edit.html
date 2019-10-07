@@ -17,7 +17,7 @@
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light">
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
 
     <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
         <img src="{{ url_for('site.static', filename='assets/arrow_back.svg') }}" width="30" height="30"
@@ -92,14 +92,15 @@
         <div class="card hide-choices no-sides left-mark">
             <div class="card-body" id="heading-{{ loop.index }}" data-toggle="collapse" role="button"
                  data-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
-                <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}"
-                      id="field-{{ loop.index }}">
+                <form method="post" action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}"
+                      class="field-sec" id="field-{{ loop.index }}">
                     <div class="form-row">
                         <div class="col-md-7 driver">
                             <label for="txt-{{ loop.index }}" class="sr-only">Question</label>
-                            <input type="text" class="form-control-plaintext h5 u-line-input pb-0"
-                                   id="txt-{{ loop.index }}" placeholder="Question"
-                                   {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}>
+                            <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
+                                   id="txt-{{ loop.index }}" placeholder="Question" name="displayed_text"
+                                   {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
+                                   onchange="this.form.submit()">
                         </div>
                         <div class="col-md-1 image-upload driven">
                             <label for="img-{{ loop.index }}">
@@ -111,9 +112,10 @@
 
                         <div class="col-md-4">
                             <label for="dtype-{{ loop.index }}" class="sr-only">Input Type</label>
-                            <select class="custom-select" id="dtype-{{ loop.index }}">
+                            <select class="custom-select" id="dtype-{{ loop.index }}" name="data_type"
+                                    onchange="this.form.submit()">
                             {% for d_type in d_types %}
-                                <option value="d_type" {% if field.data_type == d_type %} selected {% endif %}>
+                                <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
                                     {{ d_type }}
                                 </option>
                             {% endfor %}

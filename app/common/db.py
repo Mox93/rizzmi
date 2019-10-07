@@ -41,9 +41,9 @@ class ExtendedDocument(db.Document):
             return
 
     @classmethod
-    def find_by(cls, field_name, value):
+    def find_by(cls, name, value):
         try:
-            return cls.objects(**{field_name: value}).first()
+            return cls.objects(**{name: value}).first()
         except:
             return
 

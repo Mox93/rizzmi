@@ -9,6 +9,10 @@ $(function() {
     $("#element-des").change(function() {
         $("#title-field").submit();
     });
+    $("form .field-prop").change(function() {
+        var a = $(this).parents(".field-sec")[0];
+        $(a).submit()
+    });
 });
 
 // the current open accordion will not be able to close itself

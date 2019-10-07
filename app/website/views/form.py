@@ -7,7 +7,7 @@ from common.util import PY_DTYPES
 
 
 @site_bp.route("/forms", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_list():
 
     if request.method == "POST":
@@ -26,14 +26,18 @@ def form_list():
 
 
 @site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_edit(_id):
 
     if request.method == "POST":
         form = FormModel.find_by_id(_id)
 
+        print(request.form)
+
         for field in request.form:
-            setattr(form, field, request.form[field])
+            if hasattr(form, field):
+                print(f"field = {field}")
+                setattr(form, field, request.form[field])
 
         form.save()
         return redirect(url_for("site.form_edit", _id=form.id))
@@ -41,8 +45,6 @@ def form_edit(_id):
     if _id == "new":
         fields = [EmbeddedFieldModel(name="Untitled Question")]
         form = FormModel(fields=fields)
-
-        print(form.json())
 
         # TODO instead of saving just create an id for the from
         form.save()
@@ -57,7 +59,7 @@ def form_edit(_id):
 
 
 @site_bp.route("/forms/delete", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_delete():
 
     if request.method == "POST":
@@ -68,4 +70,23 @@ def form_delete():
             form.delete()
 
     return redirect(url_for("site.form_list"))
+
+
+@site_bp.route("/forms/<string:form_id>/<string:field_id>", methods=["GET", "POST"])
+@login_required
+def form_field_edit(form_id, field_id):
+
+    if request.method == "POST":
+        form = FormModel.find_by_id(form_id)
+        field = form.find_field_by_id(field_id) if form else None
+
+        if field:
+            for prop in request.form:
+                if hasattr(field, prop):
+                    setattr(field, prop, request.form[prop])
+
+            form.save()
+            return redirect(url_for("site.form_edit", _id=form.id))
+
+    return redirect(url_for("site.form_edit", _id=form_id))
 
