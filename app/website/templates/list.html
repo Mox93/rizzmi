@@ -9,12 +9,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous">
-
-    <style>
-        .light-up:hover {
-            border: 1px green solid;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('site.static', filename='css/style.css') }}">
 
     <title>{{ title }}</title>
 </head>
@@ -118,7 +113,7 @@
                         <p class="card-text">
                             <img src="{{ url_for('site.static', filename='assets/form_icon_square.svg') }}"
                              width="20" height="20" class="d-inline-block align-top" alt="">
-                            <small class="text-muted">Opened Oct {{ loop.index }}, 2019</small>
+                            <small class="text-muted">Updated {{ element.modified_date }}</small>
                         </p>
 
                         <div class="btn-group dropup">
@@ -128,15 +123,15 @@
                             </button>
 
                             <div class="dropdown-menu">
-                                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#renameModal"
-                                        data-name="{{ element.name }}" data-id="{{ element.id }}">
+                                <button class="dropdown-item cstm-btn" data-toggle="modal" data-target="#renameModal"
+                                        data-name="{{ element.name }}" data-id="{{ element.id }}" type="button">
                                     Rename
                                 </button>
-                                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteModal"
-                                        data-name="{{ element.name }}" data-id="{{ element.id }}">
+                                <button class="dropdown-item cstm-btn" data-toggle="modal" data-target="#deleteModal"
+                                        data-name="{{ element.name }}" data-id="{{ element.id }}" type="button">
                                     Delete
                                 </button>
-                                <a class="dropdown-item" href="{{ url_for('site.form_edit', _id=element.id) }}">
+                                <a class="dropdown-item cstm-btn" href="{{ url_for('site.form_edit', _id=element.id) }}">
                                     Edit
                                 </a>
                             </div>

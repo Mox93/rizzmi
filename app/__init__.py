@@ -15,7 +15,7 @@ login_manager.login_view = "dev.login"
 
 @login_manager.user_loader
 def load_user(user_id):
-    user = DeveloperModel.find_by("session_id", user_id)
+    user = DeveloperModel.find_one_by("session_id", user_id)
     return user
 
 

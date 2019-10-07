@@ -21,7 +21,7 @@ def form_list():
 
         return redirect(url_for("site.form_list"))
 
-    forms = FormModel.find_all()
+    forms = FormModel.find_all(sort_keys=["-_modified_date"])
     return render_template("list.html", elements=forms, title="Forms")
 
 
