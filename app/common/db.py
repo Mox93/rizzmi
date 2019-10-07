@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_mongoengine import MongoEngine
 
 db = MongoEngine()
@@ -5,6 +6,43 @@ db = MongoEngine()
 
 class ExtendedDocument(db.Document):
     meta = {"abstract": True}
+
+    _creation_date = db.DateTimeField()
+    _modified_date = db.DateTimeField(default=datetime.now)
+
+    @property
+    def creation_date(self, formatted=True):
+        if not formatted:
+            return self._creation_date
+
+        if self._creation_date.day == datetime.now().day:
+            return self._creation_date.strftime("%I:%M %p")
+
+        return self._creation_date.strftime("%b %d, %Y")
+
+    @creation_date.setter
+    def creation_date(self, value):
+        self._creation_date = value
+
+    @property
+    def modified_date(self, formatted=True):
+        if not formatted:
+            return self._modified_date
+
+        if self._modified_date.day == datetime.now().day:
+            return self._modified_date.strftime("%I:%M %p")
+
+        return self._modified_date.strftime("%b %d, %Y")
+
+    @modified_date.setter
+    def modified_date(self, value):
+        self._modified_date = value
+
+    def save(self, *args, **kwargs):
+        if not self._creation_date:
+            self._creation_date = datetime.now()
+        self._modified_date = datetime.now()
+        return super(ExtendedDocument, self).save(*args, **kwargs)
 
     def json(self, exclude=tuple()):
         result = self.to_mongo()
@@ -41,15 +79,26 @@ class ExtendedDocument(db.Document):
             return
 
     @classmethod
-    def find_by(cls, name, value):
+    def find_one_by(cls, name, value):
         try:
             return cls.objects(**{name: value}).first()
         except:
             return
 
     @classmethod
-    def find_all(cls):
+    def find_many_by(cls, name, value, sort_keys=tuple()):
         try:
+            if sort_keys and isinstance(sort_keys, (tuple, list, set)):
+                return cls.objects(**{name: value}).order_by(*sort_keys)
+            return cls.objects(**{name: value})
+        except:
+            return []
+
+    @classmethod
+    def find_all(cls, sort_keys=tuple()):
+        try:
+            if sort_keys and isinstance(sort_keys, (tuple, list, set)):
+                return cls.objects().order_by(*sort_keys)
             return cls.objects()
         except:
             return []

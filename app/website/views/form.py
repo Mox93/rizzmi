@@ -7,7 +7,7 @@ from common.util import PY_DTYPES
 
 
 @site_bp.route("/forms", methods=["GET", "POST"])
-@login_required
+# @login_required
 def form_list():
 
     if request.method == "POST":
@@ -21,12 +21,12 @@ def form_list():
 
         return redirect(url_for("site.form_list"))
 
-    forms = FormModel.find_all()
+    forms = FormModel.find_all(sort_keys=["-_modified_date"])
     return render_template("list.html", elements=forms, title="Forms")
 
 
 @site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
-@login_required
+# @login_required
 def form_edit(_id):
 
     if request.method == "POST":
@@ -59,7 +59,7 @@ def form_edit(_id):
 
 
 @site_bp.route("/forms/delete", methods=["GET", "POST"])
-@login_required
+# @login_required
 def form_delete():
 
     if request.method == "POST":
@@ -73,7 +73,7 @@ def form_delete():
 
 
 @site_bp.route("/forms/<string:form_id>/<string:field_id>", methods=["GET", "POST"])
-@login_required
+# @login_required
 def form_field_edit(form_id, field_id):
 
     if request.method == "POST":
