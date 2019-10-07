@@ -30,7 +30,7 @@ class ExtendedModelView(ModelView):
 
 
 def unique(form, field):
-    user = DeveloperModel.find_by(field.id, field.data)
+    user = DeveloperModel.find_one_by(field.id, field.data)
     if user:
         raise ValidationError(f"'{field.data}' already exists.")
 
@@ -54,7 +54,7 @@ from developer.views.profile import DevProfileView
 from developer.views.homepage import DevHomeView
 
 # TODO figure out how to reference the urls using url_for
-admin = Admin(app, name="Developer", template_mode='bootstrap3',
+admin = Admin(app, name="Rizzmi Team", template_mode='bootstrap3',
               index_view=DevHomeView(url="/dev", template="dev/homepage.html"))
 
 admin.add_view(ExtendedModelView(FormModel, name="Forms", endpoint="forms"))

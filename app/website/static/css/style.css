@@ -39,3 +39,20 @@
     visibility:hidden;
 }
 
+.cstm-btn{
+    background-color: white;
+    color: #252525;
+}
+
+.cstm-btn:hover{
+    background-color: #DFFFBD;
+}
+
+.cstm-btn:active{
+    background-color: #5BA50B;
+    color: white;
+}
+
+.light-up:hover {
+    border: 1px #5BA50B solid;
+}
