@@ -9,10 +9,6 @@ $(function() {
     $("#element-des").change(function() {
         $("#title-field").submit();
     });
-    $("form .field-prop").change(function() {
-        var a = $(this).parents(".field-sec")[0];
-        $(a).submit()
-    });
 });
 
 // the current open accordion will not be able to close itself
@@ -76,4 +72,24 @@ $('.collapse').on('hide.bs.collapse', function () {
 
     $(f).css("border-left", "3px solid rgba(0,0,0,0)")
 });
+
+$('#renameModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var name = button.data('name') // Extract info from data-* attributes
+    var _id = button.data('id') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    modal.find('#element-name').val(name)
+    modal.find('#element-id').val(_id)
+})
+
+$('#deleteModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget)
+    var name = button.data('name')
+    var _id = button.data('id')
+    var modal = $(this)
+    modal.find('#deleteModalLabel').text('Deleting: ' + name)
+    modal.find('#del-element-id').val(_id)
+})
 

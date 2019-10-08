@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+from flask_mongoengine import MongoEngineSessionInterface
 from models.developer import DeveloperModel
 
 
@@ -38,6 +39,7 @@ app.config["MONGODB_HOST"] = HOST
 
 db.init_app(app)
 
+app.session_interface = MongoEngineSessionInterface(db)
 
 # TODO should use environment values
 from x.recaptcha import RECAPTCHA_SITE_KEY, RECAPTCHA_SECRET_KEY

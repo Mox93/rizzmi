@@ -12,15 +12,15 @@ class FieldModel(ExtendedDocument):
 
     # TODO implement tags
 
-    name = db.StringField(required=True, max_length=50, unique=True)
-    displayed_text = db.StringField(max_length=250)
+    name = db.StringField(required=True, max_length=50, default="Untitled Field")
+    displayed_text = db.StringField(required=True, max_length=500, default="Untitled Field")
     data_type = db.StringField(required=True, choices=DTYPES.keys(), default="dynamic")
     required = db.BooleanField()
     unique = db.BooleanField()
     unique_with = db.DynamicField()
     primary_key = db.BooleanField()
     choices = db.DynamicField()
-    help_text = db.StringField(max_length=250)
+    help_text = db.StringField()
 
     # Data-type dependent attributes
     max_length = db.IntField()
@@ -64,13 +64,10 @@ class FieldModel(ExtendedDocument):
             raise db.ValidationError(msg)
 
         if isinstance(self.name, str):
-            self.name = self.name.lower()
-            if not self.displayed_text:
-                self.displayed_text = " ".join(self.name.split("_")).title()
+            self.name = self.name[:50] or "Untitled Field"
 
-    @classmethod
-    def find_by_name(cls, name):
-        return cls.objects(name=name.lower()).first()
+        if isinstance(self.displayed_text, str):
+            self.displayed_text = self.displayed_text[:500] or self.name
 
     @classmethod
     def as_embedded(cls, *args, **kwargs):
@@ -78,8 +75,10 @@ class FieldModel(ExtendedDocument):
 
             cls._embedded = type("EmbeddedFieldModel", (ExtendedEmbeddedDocument,),
                                  {"_id": db.ObjectIdField(unique=True, default=ObjectId, sparse=True),
-                                  "name": db.StringField(required=True, max_length=50),
-                                  "displayed_text": cls.displayed_text,
+
+                                  # TODO to remove the name field we'll need to clear the form collection
+                                  "name": db.StringField(max_length=50),
+                                  "displayed_text": db.StringField(max_length=500),
                                   "data_type": cls.data_type,
                                   "required": cls.required,
                                   "unique": cls.unique,
@@ -91,8 +90,7 @@ class FieldModel(ExtendedDocument):
                                   "min_length": cls.min_length,
                                   "min_value": cls.min_value,
                                   "max_value": cls.max_value,
-                                  "clean": cls.clean,
-                                  "find_by_name": cls.find_by_name})
+                                  "clean": cls.clean})
         if args or kwargs:
             return cls._embedded(*args, **kwargs)
         return cls._embedded
