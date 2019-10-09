@@ -134,6 +134,9 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
 
         return result
 
+    def delete_by_id(self, value):
+        self.objects.update(__raw__={"$pull": {"_id": value}})
+
     @classmethod
     def find_by_id(cls, _id):
         try:

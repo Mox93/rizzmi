@@ -49,11 +49,21 @@ def form_delete():
 
 
 @site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
+@site_bp.route("/forms/new", methods=["POST"])
 # @login_required
-def form_edit(_id):
+def form_edit(_id=None):
+
+    if not _id:
+        fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
+        form = FormModel(fields=fields)
+
+        # TODO instead of saving just create an id for the from
+        form.save()
+        return redirect(url_for("site.form_edit", _id=form.id))
+
+    form = FormModel.find_by_id(_id)
 
     if request.method == "POST":
-        form = FormModel.find_by_id(_id)
 
         for field in request.form:
             if hasattr(form, field):
@@ -62,17 +72,6 @@ def form_edit(_id):
         form.save()
         return '', 204
         # return redirect(url_for("site.form_edit", _id=form.id))
-
-    if _id == "new":
-        fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
-        form = FormModel(fields=fields)
-
-        # TODO instead of saving just create an id for the from
-        form.save()
-        return '', 204
-        # return redirect(url_for("site.form_edit", _id=form.id))
-
-    form = FormModel.find_by_id(_id)
 
     if form:
         return render_template("form_edit.html", element=form, d_types=PY_DTYPES.keys())
@@ -83,6 +82,7 @@ def form_edit(_id):
 @site_bp.route("/forms/<string:form_id>/<string:field_id>", methods=["GET", "POST"])
 # @login_required
 def form_field_edit(form_id, field_id):
+    print("Foo")
 
     if request.method == "POST":
         form = FormModel.find_by_id(form_id)
@@ -90,11 +90,56 @@ def form_field_edit(form_id, field_id):
 
         if field:
             field_prop = FieldProp()
-            field_prop.populate_obj(field)
 
-            form.save()
+            if field_prop.validate_on_submit():
+                field_prop.populate_obj(field)
+                form.save()
+
             return '', 204
             # return redirect(url_for("site.form_edit", _id=form.id))
 
     return redirect(url_for("site.form_edit", _id=form_id))
+
+
+@site_bp.route("/forms/<string:form_id>/<string:field_id>/new", methods=["GET", "POST"])
+@site_bp.route("/forms/<string:form_id>/new", methods=["GET", "POST"])
+# @login_required
+def form_field_add(form_id, field_id=None):
+    print("Bar")
+    print(form_id)
+    print(field_id)
+
+    form = FormModel.find_by_id(form_id)
+    field = EmbeddedFieldModel()
+
+    if form:
+        print("there is a form")
+        if not field_id:
+            form.fields.append(field)
+            form.save()
+            return redirect(url_for("site.form_edit", _id=form.id))
+
+        field_prop = FieldProp()
+
+        print(field_prop.validate_on_submit())
+        if field_prop.validate_on_submit():
+            field_prop.populate_obj(field)
+            form.fields.append(field)
+            form.save()
+            return redirect(url_for("site.form_edit", _id=form.id))
+
+    abort(404)
+
+
+@site_bp.route("/forms/<string:form_id>/<string:field_id>/delete", methods=["GET", "POST"])
+# @login_required
+def form_field_delete(form_id, field_id):
+    form = FormModel.find_by_id(form_id)
+    field = form.find_field_by_id(field_id) if form else None
+
+    if field:
+        form.fields.remove(field)
+        form.save()
+
+    return redirect(url_for("site.form_edit", _id=form.id))
 

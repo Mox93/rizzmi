@@ -85,6 +85,8 @@ $('#deleteModal').on('show.bs.modal', function (event) {
 });
 
 function change_dtype(e, i) {
+    e.form.submit();
+
     var id0 = "#dtype-" + i;
     var d_type = $(id0 + " option:selected").val();
     var prop = $(e.form).find(".prop");
@@ -96,8 +98,21 @@ function change_dtype(e, i) {
             $(prop[x]).css("display", "none");
         };
     };
-
-    e.form.submit();
 };
+
+function duplicate_field(e, i) {
+    var url = e.form.action
+    $(e.form).attr("action", url + "/new");
+    console.log(e.form);
+    e.form.submit();
+//    $(e.form).attr("action", url);
+//    console.log(e.form.action);
+
+    var id = "field-" + i
+    var itm = document.getElementById(id).lastChild;
+    var cln = itm.cloneNode(true);
+    document.getElementById("fields").appendChild(cln);
+};
+
 
 /*-------------------------------------------------------*/

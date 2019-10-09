@@ -20,7 +20,7 @@
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
 
   <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
-    <img src="{{ url_for('site.static', filename='assets/arrow_back.svg') }}" width="30" height="30"
+    <img src="{{ url_for('site.static', filename='assets/arrow_back_gray.svg') }}" width="30" height="30"
          class="d-inline-block align-top" alt="">
   </a>
   <form method="post" class="form-inline" action="{{ url_for('site.form_edit', _id=element.id) }}" id="name-field">
@@ -113,7 +113,7 @@
 
         <div class="col-md-1 image-upload driven">
           <label for="img-{{ i }}">
-            <img src="{{ url_for('site.static', filename='assets/insert_photo.svg') }}"
+            <img src="{{ url_for('site.static', filename='assets/insert_photo_gray.svg') }}"
                  width="30" height="30" class="d-inline-block align-top" alt="">
           </label>
           <input type="file" accept="image/*"  id="img-{{ i }}">
@@ -153,17 +153,47 @@
         </div>
 
         <div class="card-footer d-flex justify-content-end">
-          <div class="form-inline pl-3" style="border-left: 1px solid rgba(0,0,0,.25);">
+          <button class="icon-btn-x mx-2" type="submit" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+                  title="Duplicate" onclick="duplicate_field(this, {{ i }})">
+            <img src="{{ url_for('site.static', filename='assets/copy_outline_gray.svg') }}">
+          </button>
+
+          <button class="icon-btn-x mx-2" href="#field-{{ i }}" role="button" id="delete-{{ i }}" data-toggle="tooltip"
+             data-placement="bottom" title="Delete">
+            <img src="{{ url_for('site.static', filename='assets/delete_gray.svg') }}">
+          </button>
+
+          <div class="form-inline pl-3 ml-2" style="border-left: 1px solid rgba(0,0,0,.25);">
+
             <span class="mb-0 mr-2 h6" style="color: #333333;">Required</span>
             <label class="switch">
               <input type="checkbox" name="required" onchange="this.form.submit()"
                      {% if field.required %} checked {% endif %}>
               <span class="slider round"></span>
             </label>
-            <!--More will be here-->
+
+            <div class="btn-group dropup ml-3">
+              <a class="icon-btn" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                 aria-haspopup="true" aria-expanded="false">
+                <img src="{{ url_for('site.static', filename='assets/actions_gray.svg') }}">
+              </a>
+
+              <div class="dropdown-menu dropdown-menu-right">
+                <button class="dropdown-item cstm-sub-btn" type="button">
+                  Description
+                </button>
+                <button class="dropdown-item cstm-sub-btn" type="button">
+                  Go to section base on answer
+                </button>
+                <a class="dropdown-item cstm-sub-btn" href="#field-{{ i }}">
+                  ...
+                </a>
+              </div>
+            </div>
+
           </div>
-          <!--More will be here-->
         </div>
+
       </div>
     </form>
     {% endfor %}
