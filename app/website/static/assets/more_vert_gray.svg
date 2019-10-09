@@ -11,11 +11,11 @@
    height="24"
    viewBox="0 0 24 24"
    version="1.1"
-   id="svg934"
-   sodipodi:docname="arrow_back_gray.svg"
+   id="svg2195"
+   sodipodi:docname="more_vert-24px.svg"
    inkscape:version="0.92.4 (f8dce91, 2019-08-02)">
   <metadata
-     id="metadata940">
+     id="metadata2201">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -26,7 +26,7 @@
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs938" />
+     id="defs2199" />
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -38,7 +38,7 @@
      inkscape:pageshadow="2"
      inkscape:window-width="1366"
      inkscape:window-height="704"
-     id="namedview936"
+     id="namedview2197"
      showgrid="false"
      inkscape:zoom="9.8333333"
      inkscape:cx="0.66101695"
@@ -46,13 +46,13 @@
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg934" />
+     inkscape:current-layer="svg2195" />
   <path
      d="M0 0h24v24H0z"
      fill="none"
-     id="path930" />
+     id="path2191" />
   <path
-     d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
-     id="path932"
-     style="stroke:none;stroke-opacity:1;stroke-linejoin:round;stroke-linecap:round;fill:#585858;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none" />
+     d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+     id="path2193"
+     style="fill:#585858;fill-opacity:1" />
 </svg>

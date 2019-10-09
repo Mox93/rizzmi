@@ -77,7 +77,7 @@ class FieldModel(ExtendedDocument):
                                  {"_id": db.ObjectIdField(unique=True, default=ObjectId, sparse=True),
 
                                   # TODO to remove the name field we'll need to clear the form collection
-                                  "name": db.StringField(max_length=50),
+                                  "order": db.IntField(required=True),
                                   "displayed_text": db.StringField(max_length=500),
                                   "data_type": cls.data_type,
                                   "required": cls.required,

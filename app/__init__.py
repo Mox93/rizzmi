@@ -2,6 +2,7 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mongoengine import MongoEngineSessionInterface
+from flask_wtf.csrf import CSRFProtect
 from models.developer import DeveloperModel
 
 
@@ -10,8 +11,9 @@ app = Flask(__name__)
 Bootstrap(app)
 
 login_manager = LoginManager(app)
-
 login_manager.login_view = "dev.login"
+
+csrf = CSRFProtect(app)
 
 
 @login_manager.user_loader

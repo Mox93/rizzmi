@@ -10,13 +10,13 @@ from common.util import PY_DTYPES
 
 class FieldProp(FlaskForm):
     displayed_text = StringField("Question")
-    data_type = SelectField("Input Type", choices=PY_DTYPES)
+    data_type = SelectField("Input Type", choices=list(PY_DTYPES.keys()))
     help_text = TextAreaField("Description")
     required = BooleanField("Required")
 
 
 @site_bp.route("/forms", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_list():
 
     if request.method == "POST":
@@ -35,7 +35,7 @@ def form_list():
 
 
 @site_bp.route("/forms/delete", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_delete():
 
     if request.method == "POST":
@@ -50,7 +50,7 @@ def form_delete():
 
 @site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
 @site_bp.route("/forms/new", methods=["POST"])
-# @login_required
+@login_required
 def form_edit(_id=None):
 
     if not _id:
@@ -80,66 +80,71 @@ def form_edit(_id=None):
 
 
 @site_bp.route("/forms/<string:form_id>/<string:field_id>", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_field_edit(form_id, field_id):
-    print("Foo")
 
     if request.method == "POST":
         form = FormModel.find_by_id(form_id)
         field = form.find_field_by_id(field_id) if form else None
 
         if field:
-            field_prop = FieldProp()
+            field_prop = FieldProp(request.form, obj=form)
+            field_prop.populate_obj(field)
 
-            if field_prop.validate_on_submit():
-                field_prop.populate_obj(field)
-                form.save()
+            print("From EDIT")
+            print(field_prop.required.data)
+            print(field.required)
 
+            form.save()
             return '', 204
             # return redirect(url_for("site.form_edit", _id=form.id))
 
-    return redirect(url_for("site.form_edit", _id=form_id))
+    return abort(404)  # redirect(url_for("site.form_edit", _id=form_id))
 
 
 @site_bp.route("/forms/<string:form_id>/<string:field_id>/new", methods=["GET", "POST"])
 @site_bp.route("/forms/<string:form_id>/new", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_field_add(form_id, field_id=None):
-    print("Bar")
-    print(form_id)
-    print(field_id)
-
     form = FormModel.find_by_id(form_id)
-    field = EmbeddedFieldModel()
 
     if form:
-        print("there is a form")
+        new_field = EmbeddedFieldModel()
+
         if not field_id:
-            form.fields.append(field)
+            form.fields.append(new_field)
             form.save()
             return redirect(url_for("site.form_edit", _id=form.id))
 
-        field_prop = FieldProp()
+        i, field = form.find_field_by_id(field_id, index=True)
 
-        print(field_prop.validate_on_submit())
-        if field_prop.validate_on_submit():
-            field_prop.populate_obj(field)
-            form.fields.append(field)
-            form.save()
-            return redirect(url_for("site.form_edit", _id=form.id))
+        field_prop = FieldProp(obj=field)
+        field_prop.populate_obj(new_field)
+
+        print("From ADD")
+        print(field_prop.required.data)
+        print(new_field.required)
+
+        form.fields.insert(i+1, new_field)
+        form.save()
+        return redirect(url_for("site.form_edit", _id=form.id))
 
     abort(404)
 
 
 @site_bp.route("/forms/<string:form_id>/<string:field_id>/delete", methods=["GET", "POST"])
-# @login_required
+@login_required
 def form_field_delete(form_id, field_id):
     form = FormModel.find_by_id(form_id)
-    field = form.find_field_by_id(field_id) if form else None
 
-    if field:
-        form.fields.remove(field)
-        form.save()
+    if form:
+        i, field = form.find_field_by_id(field_id, index=True)
 
-    return redirect(url_for("site.form_edit", _id=form.id))
+        if field:
+            form.fields.pop(i)
+            form.save()
+
+            return redirect(url_for("site.form_edit", _id=form.id))
+
+    return abort(404)
 

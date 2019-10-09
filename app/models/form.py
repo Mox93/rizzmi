@@ -70,9 +70,13 @@ class FormModel(ExtendedDocument):
         if isinstance(self.title, str):
             self.title = self.title[:500] or self.name
 
-    def find_field_by_id(self, _id):
-        for field in self.fields:
+    def find_field_by_id(self, _id, index=False):
+        for i, field in enumerate(self.fields):
             if _id == str(field._id):
-                return field
-        return
+                if index:
+                    return i, field
+                else:
+                    return field
+        if index:
+            return -1, None
 

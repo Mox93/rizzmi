@@ -1,5 +1,7 @@
 
 
+var globals = {};
+
 // the current open accordion will not be able to close itself
 $('[data-toggle="collapse"]').on('click',function(e){
     if ( $(this).parents('.accordion').find('.collapse.show') ){
@@ -92,7 +94,7 @@ function change_dtype(e, i) {
     var prop = $(e.form).find(".prop");
 
     for (x = 0; x < prop.length; x++) {
-        if (d_type+i === prop[x].id) {
+        if (d_type+i == prop[x].id) {
             $(prop[x]).css("display", "block");
         } else {
             $(prop[x]).css("display", "none");
@@ -100,18 +102,11 @@ function change_dtype(e, i) {
     };
 };
 
-function duplicate_field(e, i) {
-    var url = e.form.action
-    $(e.form).attr("action", url + "/new");
-    console.log(e.form);
-    e.form.submit();
-//    $(e.form).attr("action", url);
-//    console.log(e.form.action);
-
-    var id = "field-" + i
-    var itm = document.getElementById(id).lastChild;
-    var cln = itm.cloneNode(true);
-    document.getElementById("fields").appendChild(cln);
+function duplicate_field(url) {
+    //create a form
+    var f = document.createElement("form");
+    f.setAttribute('method', "post");
+    f.setAttribute('action', url);
 };
 
 

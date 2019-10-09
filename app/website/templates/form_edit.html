@@ -24,6 +24,7 @@
          class="d-inline-block align-top" alt="">
   </a>
   <form method="post" class="form-inline" action="{{ url_for('site.form_edit', _id=element.id) }}" id="name-field">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="form-group mb-2">
       <label for="element-name" class="sr-only">Name</label>
       <input type="text" class="hu-line-input form-control-plaintext h5 pb-0" id="element-name"
@@ -50,6 +51,7 @@
   </div>
 
   <form class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="input-group my-auto">
       <div class="input-group-prepend">
         <button class="btn btn-outline-success" type="button">Search</button>
@@ -80,6 +82,7 @@
       <div class="card-body" data-toggle="collapse" data-target="#collapse-0" aria-expanded="false"
            aria-controls="collapse-0">
         <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-field">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="form-group mb-2">
             <label for="element-name" class="sr-only">Title</label>
             <input type="text" class="form-control-plaintext h3 u-line-input" id="element-title"
@@ -99,6 +102,7 @@
     {% set i = loop.index %}
     <form action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}"
           method="post" id="field-{{ i }}" class="card hide-choices no-sides left-mark">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
       <div class="card-body form-row" id="heading-{{ i }}" data-toggle="collapse" role="button"
            data-target="#collapse-{{ i }}" aria-expanded="false" aria-controls="collapse-{{ i }}">
@@ -153,19 +157,19 @@
         </div>
 
         <div class="card-footer d-flex justify-content-end">
-          <button class="icon-btn-x mx-2" type="submit" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
-                  title="Duplicate" onclick="duplicate_field(this, {{ i }})">
+          <a class="icon-btn-x mr-1" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+             title="Duplicate" href="{{ url_for('site.form_field_add', form_id=element.id, field_id=field._id) }}">
             <img src="{{ url_for('site.static', filename='assets/copy_outline_gray.svg') }}">
-          </button>
+          </a>
 
-          <button class="icon-btn-x mx-2" href="#field-{{ i }}" role="button" id="delete-{{ i }}" data-toggle="tooltip"
-             data-placement="bottom" title="Delete">
+          <a class="icon-btn-x mx-4" id="delete-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+             title="Delete" href="{{ url_for('site.form_field_delete', form_id=element.id, field_id=field._id) }}" >
             <img src="{{ url_for('site.static', filename='assets/delete_gray.svg') }}">
-          </button>
+          </a>
 
-          <div class="form-inline pl-3 ml-2" style="border-left: 1px solid rgba(0,0,0,.25);">
+          <div class="form-inline pl-3 ml-3" style="border-left: 1px solid rgba(0,0,0,.25);">
 
-            <span class="mb-0 mr-2 h6" style="color: #333333;">Required</span>
+            <span class="mb-0 mr-2 h6" style="color: #585858;">Required</span>
             <label class="switch">
               <input type="checkbox" name="required" onchange="this.form.submit()"
                      {% if field.required %} checked {% endif %}>
@@ -175,7 +179,7 @@
             <div class="btn-group dropup ml-3">
               <a class="icon-btn" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
                  aria-haspopup="true" aria-expanded="false">
-                <img src="{{ url_for('site.static', filename='assets/actions_gray.svg') }}">
+                <img src="{{ url_for('site.static', filename='assets/more_vert_gray.svg') }}">
               </a>
 
               <div class="dropdown-menu dropdown-menu-right">
