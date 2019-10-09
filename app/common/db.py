@@ -11,8 +11,8 @@ class ExtendedDocument(db.Document):
     _modified_date = db.DateTimeField(default=datetime.now)
 
     @property
-    def creation_date(self, formatted=True):
-        if not formatted:
+    def creation_date(self, raw=False):
+        if raw:
             return self._creation_date
 
         if self._creation_date.day == datetime.now().day:
@@ -25,8 +25,8 @@ class ExtendedDocument(db.Document):
         self._creation_date = value
 
     @property
-    def modified_date(self, formatted=True):
-        if not formatted:
+    def modified_date(self, raw=False):
+        if raw:
             return self._modified_date
 
         if self._modified_date.day == datetime.now().day:
@@ -133,6 +133,9 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
                 print(self, e)
 
         return result
+
+    def delete_by_id(self, value):
+        self.objects.update(__raw__={"$pull": {"_id": value}})
 
     @classmethod
     def find_by_id(cls, _id):

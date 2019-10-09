@@ -15,7 +15,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 (f8dce91, 2019-08-02)"
-   sodipodi:docname="form_icon_.svg">
+   sodipodi:docname="form_icon_square.svg">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -63,7 +63,8 @@
          width="29.99972"
          height="29.99972"
          x="96.57299"
-         y="98.357681" />
+         y="98.357681"
+         rx="2.9999719" />
       <g
          id="g928"
          transform="translate(0,-0.2041036)">

@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+from flask_mongoengine import MongoEngineSessionInterface
+from flask_wtf.csrf import CSRFProtect
 from models.developer import DeveloperModel
 
 
@@ -9,8 +11,9 @@ app = Flask(__name__)
 Bootstrap(app)
 
 login_manager = LoginManager(app)
-
 login_manager.login_view = "dev.login"
+
+csrf = CSRFProtect(app)
 
 
 @login_manager.user_loader
@@ -37,11 +40,10 @@ app.config["MONGODB_DB"] = os.environ["DB_NAME"]
 app.config["MONGODB_HOST"] = os.environ["MONGOLAB_MAROON_URI"]
 app.config['MONGODB_CONNECT'] = False
 
-
 from common.db import db
 
 db.init_app(app)
-
+app.session_interface = MongoEngineSessionInterface(db)
 
 from api import api_bp
 from website import site_bp

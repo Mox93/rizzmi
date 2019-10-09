@@ -3,149 +3,206 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-          crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{{ url_for('site.static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('site.static', filename='css/style.css') }}">
 
-    <title>{{ element.name }}</title>
+  <title>{{ element.name }}</title>
 </head>
 
 <body>
 
 <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
 
-    <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
-        <img src="{{ url_for('site.static', filename='assets/arrow_back.svg') }}" width="30" height="30"
-             class="d-inline-block align-top" alt="">
-    </a>
-    <form method="post" class="form-inline" action="{{ url_for('site.form_edit', _id=element.id) }}" id="name-field">
-        <div class="form-group mb-2">
-            <label for="element-name" class="sr-only">Name</label>
-            <input type="text" class="hu-line-input form-control-plaintext h5 pb-0" id="element-name"
-                   value="{{ element.name }}" name="name">
-        </div>
-    </form>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="#">Preview</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Send</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#">Settings</a>
-            </li>
-        </ul>
+  <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
+    <img src="{{ url_for('site.static', filename='assets/arrow_back_gray.svg') }}" width="30" height="30"
+         class="d-inline-block align-top" alt="">
+  </a>
+  <form method="post" class="form-inline" action="{{ url_for('site.form_edit', _id=element.id) }}" id="name-field">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group mb-2">
+      <label for="element-name" class="sr-only">Name</label>
+      <input type="text" class="hu-line-input form-control-plaintext h5 pb-0" id="element-name"
+             value="{{ element.name }}" name="name" onchange="this.form.submit()">
     </div>
-    <form class="form-inline">
-        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-    </form>
+  </form>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Preview</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Send</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Settings</a>
+      </li>
+    </ul>
+  </div>
+
+  <form class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="input-group my-auto">
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-success" type="button">Search</button>
+      </div>
+      <input type="search" class="form-control" placeholder="Search" aria-label="Search"
+             aria-describedby="basic-addon1">
+    </div>
+  </form>
 
 </nav>
 
 <div class="card my-5 mx-auto" style="max-width: 50rem;">
 
-    <div class="card-header">
-        <ul class="nav justify-content-center nav-tabs card-header-tabs">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">Questions</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link disabled" href="#">Responses</a>
-            </li>
-        </ul>
+  <div class="card-header">
+    <ul class="nav justify-content-center nav-tabs card-header-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Questions</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Responses</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="accordion" id="fields">
+
+    <div class="card no-sides left-mark" style="border-top: none;">
+      <div class="card-body" data-toggle="collapse" data-target="#collapse-0" aria-expanded="false"
+           aria-controls="collapse-0">
+        <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-field">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="form-group mb-2">
+            <label for="element-name" class="sr-only">Title</label>
+            <input type="text" class="form-control-plaintext h3 u-line-input" id="element-title"
+                   value="{{ element.title }}" name="title" onchange="this.form.submit()">
+            <label for="element-name" class="sr-only">Description</label>
+            <input type="text" class="form-control-plaintext u-line-input" id="element-des" placeholder="Description..."
+                   {% if element.description %} value="{{ element.description }}" {% endif %} name="description"
+                   onchange="this.form.submit()">
+          </div>
+        </form>
+      </div>
+
+      <div id="collapse-0" class="collapse" aria-labelledby="heading-0" data-parent="#fields"></div>
     </div>
 
-    <div class="accordion" id="fields">
+    {% for field in element.fields %}
+    {% set i = loop.index %}
+    <form action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}"
+          method="post" id="field-{{ i }}" class="card hide-choices no-sides left-mark">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        <div class="card no-sides left-mark" style="border-top: none;">
-            <div class="card-body" data-toggle="collapse" data-target="#collapse-0" aria-expanded="true"
-                 aria-controls="collapse-0">
-                <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-field">
-                    <div class="form-group mb-2">
-                        <label for="element-name" class="sr-only">Title</label>
-                        <input type="text" class="form-control-plaintext h3 u-line-input" id="element-title"
-                               value="{{ element.title }}" name="title">
-                        <label for="element-name" class="sr-only">Description</label>
-                        <input type="text" class="form-control-plaintext u-line-input" id="element-des" placeholder="Description..."
-                               {% if element.description %} value="{{ element.description }}" {% endif %} name="description">
-                    </div>
-                </form>
+      <div class="card-body form-row" id="heading-{{ i }}" data-toggle="collapse" role="button"
+           data-target="#collapse-{{ i }}" aria-expanded="false" aria-controls="collapse-{{ i }}">
+
+        <div class="col-md-7 driver">
+          <label for="txt-{{ i }}" class="sr-only">Question</label>
+          <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
+                 id="txt-{{ i }}" placeholder="Question" name="displayed_text"
+                 {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
+                 onchange="this.form.submit()">
+        </div>
+
+        <div class="col-md-1 image-upload driven">
+          <label for="img-{{ i }}">
+            <img src="{{ url_for('site.static', filename='assets/insert_photo_gray.svg') }}"
+                 width="30" height="30" class="d-inline-block align-top" alt="">
+          </label>
+          <input type="file" accept="image/*"  id="img-{{ i }}">
+        </div>
+
+        <div class="col-md-4 dropdown">
+          <label for="dtype-{{ i }}" class="sr-only">Input Type</label>
+          <select class="custom-select" id="dtype-{{ i }}" name="data_type"
+                  onchange="change_dtype(this, {{ i }}, value);">
+            {% for d_type in d_types %}
+            <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
+              {{ d_type }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+
+      <div id="collapse-{{ i }}" class="collapse" aria-labelledby="heading-{{ i }}"
+           data-parent="#fields">
+
+        <div class="card-body">
+          <div class="d-type-prop">
+            {% for d_type in d_types %}
+            <div class="prop" id="{{ d_type }}{{ i }}"
+                 {% if field.data_type != d_type %} style="display: none;" {% endif %}>
+              <h3>{{ d_type }}</h3>
             </div>
+            {% endfor %}
+          </div>
 
-            <div id="collapse-0" class="collapse show" aria-labelledby="heading-0" data-parent="#fields"></div>
+          <p>
+            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid.
+          </p>
 
         </div>
 
-        {% for field in element.fields %}
-        <div class="card hide-choices no-sides left-mark">
-            <div class="card-body" id="heading-{{ loop.index }}" data-toggle="collapse" role="button"
-                 data-target="#collapse-{{ loop.index }}" aria-expanded="false" aria-controls="collapse-{{ loop.index }}">
-                <form method="post" action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}"
-                      class="field-sec" id="field-{{ loop.index }}">
-                    <div class="form-row">
-                        <div class="col-md-7 driver">
-                            <label for="txt-{{ loop.index }}" class="sr-only">Question</label>
-                            <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
-                                   id="txt-{{ loop.index }}" placeholder="Question" name="displayed_text"
-                                   {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
-                                   onchange="this.form.submit()">
-                        </div>
-                        <div class="col-md-1 image-upload driven">
-                            <label for="img-{{ loop.index }}">
-                                <img src="{{ url_for('site.static', filename='assets/insert_photo.svg') }}"
-                                     width="30" height="30" class="d-inline-block align-top" alt="">
-                            </label>
-                            <input type="file" accept="image/*"  id="img-{{ loop.index }}">
-                        </div>
+        <div class="card-footer d-flex justify-content-end">
+          <a class="icon-btn-x mr-1" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+             title="Duplicate" href="{{ url_for('site.form_field_add', form_id=element.id, field_id=field._id) }}">
+            <img src="{{ url_for('site.static', filename='assets/copy_outline_gray.svg') }}">
+          </a>
 
-                        <div class="col-md-4">
-                            <label for="dtype-{{ loop.index }}" class="sr-only">Input Type</label>
-                            <select class="custom-select" id="dtype-{{ loop.index }}" name="data_type"
-                                    onchange="this.form.submit()">
-                            {% for d_type in d_types %}
-                                <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
-                                    {{ d_type }}
-                                </option>
-                            {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </form>
+          <a class="icon-btn-x mx-4" id="delete-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+             title="Delete" href="{{ url_for('site.form_field_delete', form_id=element.id, field_id=field._id) }}" >
+            <img src="{{ url_for('site.static', filename='assets/delete_gray.svg') }}">
+          </a>
+
+          <div class="form-inline pl-3 ml-3" style="border-left: 1px solid rgba(0,0,0,.25);">
+
+            <span class="mb-0 mr-2 h6" style="color: #585858;">Required</span>
+            <label class="switch">
+              <input type="checkbox" name="required" onchange="this.form.submit()"
+                     {% if field.required %} checked {% endif %}>
+              <span class="slider round"></span>
+            </label>
+
+            <div class="btn-group dropup ml-3">
+              <a class="icon-btn" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                 aria-haspopup="true" aria-expanded="false">
+                <img src="{{ url_for('site.static', filename='assets/more_vert_gray.svg') }}">
+              </a>
+
+              <div class="dropdown-menu dropdown-menu-right">
+                <button class="dropdown-item cstm-sub-btn" type="button">
+                  Description
+                </button>
+                <button class="dropdown-item cstm-sub-btn" type="button">
+                  Go to section base on answer
+                </button>
+                <a class="dropdown-item cstm-sub-btn" href="#field-{{ i }}">
+                  ...
+                </a>
+              </div>
             </div>
 
-            <div id="collapse-{{ loop.index }}" class="collapse" aria-labelledby="heading-{{ loop.index }}"
-                 data-parent="#fields">
-                <div class="card-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
-                    wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
-                    eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
-                    assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt
-                    sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
-                    farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
-                    labore sustainable VHS.
-                </div>
-
-                <div class="card-footer">
-                    Anim pariatur cliche reprehenderit,
-                </div>
-            </div>
+          </div>
         </div>
-        {% endfor %}
 
-    </div>
+      </div>
+    </form>
+    {% endfor %}
 
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -161,4 +218,3 @@
 
 </body>
 </html>
-
