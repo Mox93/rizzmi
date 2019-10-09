@@ -8,6 +8,13 @@ from models.field import EmbeddedFieldModel
 from common.util import PY_DTYPES
 
 
+class FieldProp(FlaskForm):
+    displayed_text = StringField("Question")
+    data_type = SelectField("Input Type", choices=PY_DTYPES)
+    help_text = TextAreaField("Description")
+    required = BooleanField("Required")
+
+
 @site_bp.route("/forms", methods=["GET", "POST"])
 # @login_required
 def form_list():
@@ -41,18 +48,6 @@ def form_delete():
     return redirect(url_for("site.form_list"))
 
 
-class FormProp(FlaskForm):
-    title = StringField("Title")
-    description = TextAreaField("Description")
-
-
-class FieldProp(FlaskForm):
-    displayed_text = StringField("Question")
-    data_type = SelectField("Input Type", choices=PY_DTYPES)
-    help_text = TextAreaField("Description")
-    required = BooleanField("Required")
-
-
 @site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
 # @login_required
 def form_edit(_id):
@@ -60,8 +55,9 @@ def form_edit(_id):
     if request.method == "POST":
         form = FormModel.find_by_id(_id)
 
-        form_prop = FormProp()
-        form_prop.populate_obj(form)
+        for field in request.form:
+            if hasattr(form, field):
+                setattr(form, field, request.form[field])
 
         form.save()
         return '', 204

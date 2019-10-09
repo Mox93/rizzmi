@@ -1,15 +1,4 @@
-// these will always run
-$(function() {
-    $("#element-name").change(function() {
-        $("#name-field").submit();
-    });
-    $("#element-title").change(function() {
-        $("#title-field").submit();
-    });
-    $("#element-des").change(function() {
-        $("#title-field").submit();
-    });
-});
+
 
 // the current open accordion will not be able to close itself
 $('[data-toggle="collapse"]').on('click',function(e){
@@ -73,6 +62,7 @@ $('.collapse').on('hide.bs.collapse', function () {
     $(f).css("border-left", "3px solid rgba(0,0,0,0)")
 });
 
+// Modal related stuff
 $('#renameModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var name = button.data('name') // Extract info from data-* attributes
@@ -82,8 +72,9 @@ $('#renameModal').on('show.bs.modal', function (event) {
     var modal = $(this)
     modal.find('#element-name').val(name)
     modal.find('#element-id').val(_id)
-})
+});
 
+// Also modal related stuff
 $('#deleteModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget)
     var name = button.data('name')
@@ -91,5 +82,22 @@ $('#deleteModal').on('show.bs.modal', function (event) {
     var modal = $(this)
     modal.find('#deleteModalLabel').text('Deleting: ' + name)
     modal.find('#del-element-id').val(_id)
-})
+});
 
+function change_dtype(e, i) {
+    var id0 = "#dtype-" + i;
+    var d_type = $(id0 + " option:selected").val();
+    var prop = $(e.form).find(".prop");
+
+    for (x = 0; x < prop.length; x++) {
+        if (d_type+i === prop[x].id) {
+            $(prop[x]).css("display", "block");
+        } else {
+            $(prop[x]).css("display", "none");
+        };
+    };
+
+    e.form.submit();
+};
+
+/*-------------------------------------------------------*/

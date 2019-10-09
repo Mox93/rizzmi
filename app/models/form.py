@@ -63,6 +63,7 @@ class FormModel(ExtendedDocument):
         """
         * Trims off name to its maximum length
         """
+
         if isinstance(self.name, str):
             self.name = self.name[:50] or "Untitled Form"
 
