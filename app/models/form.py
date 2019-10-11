@@ -65,10 +65,10 @@ class FormModel(ExtendedDocument):
         """
 
         if isinstance(self.name, str):
-            self.name = self.name[:50] or "Untitled Form"
+            self.name = self.name.strip()[:50] or "Untitled Form"
 
         if isinstance(self.title, str):
-            self.title = self.title[:500] or self.name
+            self.title = self.title.strip()[:500] or self.name
 
     def find_field_by_id(self, _id, index=False):
         for i, field in enumerate(self.fields):

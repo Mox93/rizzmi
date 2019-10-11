@@ -15,9 +15,9 @@
   <title>{{ element.name }}</title>
 </head>
 
-<body>
+<body style="background: #DFFFBD;">
 
-<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light" id="navbar">
 
   <a class="navbar-brand" href="{{ url_for('site.form_list') }}">
     <img src="{{ url_for('site.static', filename='assets/arrow_back_gray.svg') }}" width="30" height="30"
@@ -28,7 +28,7 @@
     <div class="form-group mb-2">
       <label for="element-name" class="sr-only">Name</label>
       <input type="text" class="hu-line-input form-control-plaintext h5 pb-0" id="element-name"
-             value="{{ element.name }}" name="name" onchange="this.form.submit()">
+             value="{{ element.name }}" name="name" onchange="name_submit(this)">
     </div>
   </form>
 
@@ -63,146 +63,186 @@
 
 </nav>
 
-<div class="card my-5 mx-auto" style="max-width: 50rem;">
+<div class="d-flex justify-content-center">
 
-  <div class="card-header">
-    <ul class="nav justify-content-center nav-tabs card-header-tabs">
-      <li class="nav-item">
-        <a class="nav-link active" href="#">Questions</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#">Responses</a>
-      </li>
-    </ul>
-  </div>
+  <div class="m-3" style="width: 3rem; height: 15rem;"></div>
 
-  <div class="accordion" id="fields">
+  <div class="card my-5" style="width: 50rem;">
 
-    <div class="card no-sides left-mark" style="border-top: none;">
-      <div class="card-body" data-toggle="collapse" data-target="#collapse-0" aria-expanded="false"
-           aria-controls="collapse-0">
-        <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-field">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          <div class="form-group mb-2">
-            <label for="element-name" class="sr-only">Title</label>
-            <input type="text" class="form-control-plaintext h3 u-line-input" id="element-title"
-                   value="{{ element.title }}" name="title" onchange="this.form.submit()">
-            <label for="element-name" class="sr-only">Description</label>
-            <input type="text" class="form-control-plaintext u-line-input" id="element-des" placeholder="Description..."
-                   {% if element.description %} value="{{ element.description }}" {% endif %} name="description"
-                   onchange="this.form.submit()">
-          </div>
-        </form>
-      </div>
-
-      <div id="collapse-0" class="collapse" aria-labelledby="heading-0" data-parent="#fields"></div>
+    <div class="card-header">
+      <ul class="nav justify-content-center nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Questions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#">Responses</a>
+        </li>
+      </ul>
     </div>
 
-    {% for field in element.fields %}
-    {% set i = loop.index %}
-    <form action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}"
-          method="post" id="field-{{ i }}" class="card hide-choices no-sides left-mark">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="accordion" id="fields">
 
-      <div class="card-body form-row" id="heading-{{ i }}" data-toggle="collapse" role="button"
-           data-target="#collapse-{{ i }}" aria-expanded="false" aria-controls="collapse-{{ i }}">
-
-        <div class="col-md-7 driver">
-          <label for="txt-{{ i }}" class="sr-only">Question</label>
-          <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
-                 id="txt-{{ i }}" placeholder="Question" name="displayed_text"
-                 {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
-                 onchange="this.form.submit()">
+      <div class="card no-sides left-mark" style="border-top: none;">
+        <div class="card-body" data-toggle="collapse" data-target="#collapse-0" aria-expanded="false"
+             aria-controls="collapse-0">
+          <form method="post" action="{{ url_for('site.form_edit', _id=element.id) }}" id="title-field">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group mb-2">
+              <label for="element-name" class="sr-only">Title</label>
+              <input type="text" class="form-control-plaintext h3 u-line-input" id="element-title"
+                     value="{{ element.title }}" name="title" onchange="title_submit(this)">
+              <label for="element-name" class="sr-only">Description</label>
+              <input type="text" class="form-control-plaintext u-line-input" id="element-des" placeholder="Description..."
+                     {% if element.description %} value="{{ element.description }}" {% endif %} name="description"
+                     onchange="this.form.submit()">
+            </div>
+          </form>
         </div>
 
-        <div class="col-md-1 image-upload driven">
-          <label for="img-{{ i }}">
-            <img src="{{ url_for('site.static', filename='assets/insert_photo_gray.svg') }}"
-                 width="30" height="30" class="d-inline-block align-top" alt="">
-          </label>
-          <input type="file" accept="image/*"  id="img-{{ i }}">
-        </div>
-
-        <div class="col-md-4 dropdown">
-          <label for="dtype-{{ i }}" class="sr-only">Input Type</label>
-          <select class="custom-select" id="dtype-{{ i }}" name="data_type"
-                  onchange="change_dtype(this, {{ i }}, value);">
-            {% for d_type in d_types %}
-            <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
-              {{ d_type }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-
+        <div id="collapse-0" class="collapse" aria-labelledby="heading-0" data-parent="#fields"></div>
       </div>
 
-      <div id="collapse-{{ i }}" class="collapse" aria-labelledby="heading-{{ i }}"
-           data-parent="#fields">
+      {% for field in element.fields %}
+      {% set i = loop.index %}
+      <form action="{{ url_for('site.form_field_edit', form_id=element.id, field_id=field._id) }}" method="post"
+            id="field-{{ i }}" class="card hide-choices no-sides left-mark" data-order={{ field.order }}>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-        <div class="card-body">
-          <div class="d-type-prop">
-            {% for d_type in d_types %}
-            <div class="prop" id="{{ d_type }}{{ i }}"
-                 {% if field.data_type != d_type %} style="display: none;" {% endif %}>
-              <h3>{{ d_type }}</h3>
-            </div>
-            {% endfor %}
+        <div class="card-body form-row" id="heading-{{ i }}" data-toggle="collapse" role="button"
+             data-target="#collapse-{{ i }}" aria-expanded="false" aria-controls="collapse-{{ i }}">
+
+          <div class="col-md-7 driver">
+            <label for="txt-{{ i }}" class="sr-only">Question</label>
+            <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
+                   id="txt-{{ i }}" placeholder="Question" name="displayed_text"
+                   {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
+                   onchange="this.form.submit()">
           </div>
 
-          <p>
-            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid.
-          </p>
-
-        </div>
-
-        <div class="card-footer d-flex justify-content-end">
-          <a class="icon-btn-x mr-1" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
-             title="Duplicate" href="{{ url_for('site.form_field_add', form_id=element.id, field_id=field._id) }}">
-            <img src="{{ url_for('site.static', filename='assets/copy_outline_gray.svg') }}">
-          </a>
-
-          <a class="icon-btn-x mx-4" id="delete-{{ i }}" data-toggle="tooltip" data-placement="bottom"
-             title="Delete" href="{{ url_for('site.form_field_delete', form_id=element.id, field_id=field._id) }}" >
-            <img src="{{ url_for('site.static', filename='assets/delete_gray.svg') }}">
-          </a>
-
-          <div class="form-inline pl-3 ml-3" style="border-left: 1px solid rgba(0,0,0,.25);">
-
-            <span class="mb-0 mr-2 h6" style="color: #585858;">Required</span>
-            <label class="switch">
-              <input type="checkbox" name="required" onchange="this.form.submit()"
-                     {% if field.required %} checked {% endif %}>
-              <span class="slider round"></span>
+          <div class="col-md-1 image-upload driven">
+            <label for="img-{{ i }}">
+              <img src="{{ url_for('site.static', filename='assets/insert_photo_gray.svg') }}"
+                   width="30" height="30" class="d-inline-block align-top" alt="">
             </label>
-
-            <div class="btn-group dropup ml-3">
-              <a class="icon-btn" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
-                 aria-haspopup="true" aria-expanded="false">
-                <img src="{{ url_for('site.static', filename='assets/more_vert_gray.svg') }}">
-              </a>
-
-              <div class="dropdown-menu dropdown-menu-right">
-                <button class="dropdown-item cstm-sub-btn" type="button">
-                  Description
-                </button>
-                <button class="dropdown-item cstm-sub-btn" type="button">
-                  Go to section base on answer
-                </button>
-                <a class="dropdown-item cstm-sub-btn" href="#field-{{ i }}">
-                  ...
-                </a>
-              </div>
-            </div>
-
+            <input type="file" accept="image/*"  id="img-{{ i }}">
           </div>
+
+          <div class="col-md-4 dropdown">
+            <label for="dtype-{{ i }}" class="sr-only">Input Type</label>
+            <select class="custom-select" id="dtype-{{ i }}" name="data_type"
+                    onchange="change_dtype(this, {{ i }}, value);">
+              {% for d_type in d_types %}
+              <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
+                {{ d_type }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
         </div>
 
-      </div>
-    </form>
-    {% endfor %}
+        <div id="collapse-{{ i }}" class="collapse" aria-labelledby="heading-{{ i }}"
+             data-parent="#fields">
 
+          <div class="card-body">
+            <div class="d-type-prop">
+              {% for d_type in d_types %}
+              <div class="prop" id="{{ d_type }}{{ i }}"
+                   {% if field.data_type != d_type %} style="display: none;" {% endif %}>
+                <h3>{{ d_type }}</h3>
+              </div>
+              {% endfor %}
+            </div>
+
+            <p>
+              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid.
+            </p>
+
+          </div>
+
+          <div class="card-footer d-flex justify-content-end">
+            <a class="icon-btn-x mr-1" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+               title="Duplicate" href="{{ url_for('site.form_field_add', form_id=element.id, field_id=field._id) }}">
+              <img src="{{ url_for('site.static', filename='assets/copy_outline_gray.svg') }}">
+            </a>
+
+            <a class="icon-btn-x mx-4" id="delete-{{ i }}" data-toggle="tooltip" data-placement="bottom"
+               title="Delete" href="{{ url_for('site.form_field_delete', form_id=element.id, field_id=field._id) }}" >
+              <img src="{{ url_for('site.static', filename='assets/delete_gray.svg') }}">
+            </a>
+
+            <div class="form-inline pl-3 ml-3" style="border-left: 1px solid rgba(0,0,0,.25);">
+
+              <span class="mb-0 mr-2 h6" style="color: #585858;">Required</span>
+              <label class="switch">
+                <input type="checkbox" name="required" onchange="this.form.submit()"
+                       {% if field.required %} checked {% endif %}>
+                <span class="slider round"></span>
+              </label>
+
+              <div class="btn-group dropup ml-3">
+                <a class="icon-btn" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                  <img src="{{ url_for('site.static', filename='assets/more_vert_gray.svg') }}">
+                </a>
+
+                <div class="dropdown-menu dropdown-menu-right">
+                  <button class="dropdown-item cstm-sub-btn" type="button">
+                    Description
+                  </button>
+                  <button class="dropdown-item cstm-sub-btn" type="button">
+                    Go to section base on answer
+                  </button>
+                  <a class="dropdown-item cstm-sub-btn" href="#field-{{ i }}">
+                    ...
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </form>
+      {% endfor %}
+
+    </div>
   </div>
+
+  <div class="card tool-bar mx-3 my-5" id="toolbar">
+    <div class="card-body m-auto p-0">
+      <a class="icon-btn d-flex justify-content-start my-2" role="button" data-toggle="tooltip" data-placement="right"
+         title="Add question" href="{{ url_for('site.form_field_add', form_id=element.id) }}">
+        <img src="{{ url_for('site.static', filename='assets/add_circle_outline_gray.svg') }}">
+      </a>
+
+      <a class="icon-btn d-flex justify-content-start my-2" role="button" data-toggle="tooltip" data-placement="right"
+         title="Import question" href="#toolbar">
+        <img src="{{ url_for('site.static', filename='assets/insert_gray.svg') }}">
+      </a>
+
+      <a class="icon-btn d-flex justify-content-start my-2" role="button" data-toggle="tooltip" data-placement="right"
+         title="Add title and description" href="#toolbar">
+        <img src="{{ url_for('site.static', filename='assets/text_fields_gray.svg') }}">
+      </a>
+
+      <a class="icon-btn d-flex justify-content-start my-2" role="button" data-toggle="tooltip" data-placement="bottom"
+         title="Add image" href="#toolbar">
+        <img src="{{ url_for('site.static', filename='assets/photo_gray.svg') }}">
+      </a>
+
+      <a class="icon-btn d-flex justify-content-start my-2" role="button" data-toggle="tooltip" data-placement="right"
+         title="Add video" href="#toolbar">
+        <img src="{{ url_for('site.static', filename='assets/video_gray.svg') }}">
+      </a>
+
+      <a class="icon-btn d-flex justify-content-start my-2" role="button" data-toggle="tooltip" data-placement="right"
+         title="Add section" href="#toolbar">
+        <img src="{{ url_for('site.static', filename='assets/section_gray.svg') }}">
+      </a>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
