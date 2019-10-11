@@ -1,6 +1,6 @@
 
 
-var globals = {};
+var globals = {active_field: null};
 
 // the current open accordion will not be able to close itself
 $('[data-toggle="collapse"]').on('click',function(e){
@@ -14,6 +14,9 @@ $('[data-toggle="collapse"]').on('click',function(e){
 
 // actions for when the collapse is shown
 $('.collapse').on('show.bs.collapse', function () {
+    globals.active_field = $(this).parents(".card")[0];
+//    console.log($(globals.active_field).data("order"));
+
     var a = $(this).parents(".hide-choices").find('select')[0];
     $(a).css("visibility", "visible");
 
@@ -21,6 +24,7 @@ $('.collapse').on('show.bs.collapse', function () {
     var c = $(this).parents(".hide-choices").find('.driven label')[0];
     var d = $(this).parents(".hide-choices").find('.driven')[0];
     var f = $(this).parents(".left-mark")[0];
+    var g = $(this).parents("form.left-mark")[0];
 
     $(b).hover( function() {
         $(c).css("visibility", "visible");
@@ -36,7 +40,22 @@ $('.collapse').on('show.bs.collapse', function () {
         $(c).css("visibility", "hidden");
     });
 
-    $(f).css("border-left", "3px #3498DB solid")
+    $(f).css("border-left", "3px #3498DB solid");
+    $(f).css("border-bottom", "1px solid rgba(0,0,0,.125)");
+    $(g).css("border-top", "1px solid rgba(0,0,0,.125)");
+});
+
+$('.collapse').on('shown.bs.collapse', function () {
+    var offset = $(globals.active_field).offset();
+
+    if (offset.top + $("#toolbar").height() > $(window).scrollTop() + $(window).height()) {
+        $("#toolbar").css("top", $(window).height() - $("#toolbar").height());
+    } else if (offset.top < $("#navbar").offset().top + $("#navbar").height() + 20){
+        $("#toolbar").css("top", "5rem");
+    } else {
+        $("#toolbar").css("top", offset.top - $(window).scrollTop());
+    }
+
 });
 
 // actions for when the collapse is hidden
@@ -61,7 +80,9 @@ $('.collapse').on('hide.bs.collapse', function () {
         $(c).css("visibility", "hidden");
     });
 
-    $(f).css("border-left", "3px solid rgba(0,0,0,0)")
+    $(f).css("border-left", "3px solid rgba(0,0,0,0)");
+    $(f).css("border-top", "1px solid rgba(0,0,0,0)");
+    $(f).css("border-bottom", "1px solid rgba(0,0,0,0)");
 });
 
 // Modal related stuff
@@ -108,6 +129,21 @@ function duplicate_field(url) {
     f.setAttribute('method', "post");
     f.setAttribute('action', url);
 };
+
+function name_submit(e) {
+    if ($(e).val().trim() == "") {
+        $(e).val("Untitled Form");
+    };
+    e.form.submit();
+}
+
+function title_submit(e) {
+    if ($(e).val().trim() == "") {
+    var name = $("#element-name").val()
+        $(e).val(name);
+    };
+    e.form.submit();
+}
 
 
 /*-------------------------------------------------------*/
