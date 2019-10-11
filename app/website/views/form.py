@@ -5,12 +5,12 @@ from wtforms import StringField, TextAreaField, BooleanField, SelectField
 from website import site_bp
 from models.form import FormModel
 from models.field import EmbeddedFieldModel
-from common.util import PY_DTYPES
+from common.util import INPUT_TYPES
 
 
 class FieldProp(FlaskForm):
     displayed_text = StringField("Question")
-    data_type = SelectField("Input Type", choices=list(PY_DTYPES.keys()))
+    data_type = SelectField("Input Type", choices=INPUT_TYPES)
     help_text = TextAreaField("Description")
     required = BooleanField("Required")
 
@@ -52,16 +52,13 @@ def form_delete():
 @site_bp.route("/forms/new", methods=["GET", "POST"])
 # @login_required
 def form_edit(_id=None):
-    print(_id)
 
     if not _id:
-        print("No ID")
         fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
         form = FormModel(fields=fields)
 
         # TODO instead of saving just create an id for the from
         form.save()
-        print("Saved")
         return redirect(url_for("site.form_edit", _id=form.id))
 
     form = FormModel.find_by_id(_id)
@@ -77,7 +74,7 @@ def form_edit(_id=None):
         # return redirect(url_for("site.form_edit", _id=form.id))
 
     if form:
-        return render_template("form_edit.html", element=form, d_types=PY_DTYPES.keys())
+        return render_template("form_edit.html", element=form, d_types=INPUT_TYPES)
 
     abort(404)
 
@@ -93,10 +90,6 @@ def form_field_edit(form_id, field_id):
         if field:
             field_prop = FieldProp(request.form, obj=form)
             field_prop.populate_obj(field)
-
-            print("From EDIT")
-            print(field_prop.required.data)
-            print(field.required)
 
             form.save()
             return '', 204
@@ -123,10 +116,6 @@ def form_field_add(form_id, field_id=None):
 
         field_prop = FieldProp(obj=field)
         field_prop.populate_obj(new_field)
-
-        print("From ADD")
-        print(field_prop.required.data)
-        print(new_field.required)
 
         form.fields.insert(i+1, new_field)
         form.save()

@@ -17,6 +17,13 @@ class Singleton(type):
         return cls._instances[cls]
 
 
+class InputType(object):
+    def __init__(self, name, label, data_type):
+        self.name = name
+        self.label = label
+        self.data_type = data_type
+
+
 def dynamic(value):
     return value
 
@@ -56,12 +63,23 @@ def is_safe_url(target):
     return test_url.scheme in ("http", "https") and refer_url.netloc == test_url.netloc
 
 
-URL_MAP = []
-# URL_MAP.append
+INPUT_TYPES = ["Short answer",
+               "Paragraph",
+               ##################
+               "Multiple choice",
+               "Checkbox",
+               "Dropdown",
+               ##################
+               "File upload",
+               ##################
+               "Linear scale",
+               "Multiple choice grid",
+               "Checkbox grid",
+               ##################
+               "Date",
+               "Time"]
 
-ENDPOINT_MAP = {}
-
-PY_DTYPES = {"bool": bool,
+_PY_DTYPES = {"bool": bool,
              "datetime": datetime,
              "dict": dict,
              "dynamic": dynamic,
@@ -70,5 +88,4 @@ PY_DTYPES = {"bool": bool,
              "int": int,
              "list": list,
              "str": str}
-
 

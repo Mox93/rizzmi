@@ -25,9 +25,9 @@
 
 .no-sides {
     border-radius: 0;
-    border-top: 1px solid rgba(0,0,0,0.125);
+    border-top: 1px solid rgba(0,0,0,0);
     border-right: none;
-    border-bottom: none;
+    border-bottom: 1px solid rgba(0,0,0,0);
     border-left: 3px solid rgba(0,0,0,0);
 }
 
@@ -72,15 +72,29 @@
 
 /*-----------------------------------------------------------*/
 
+.tool-bar{
+    width: 3rem;
+    height: 15rem;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 10rem;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+/*-----------------------------------------------------------*/
+
 .icon-btn{
     background: rgba(0,0,0,0);
     border-radius: 50%;
+    width: 30px;
+    height: 30px;
 }
 
 .icon-btn img{
-    margin: none;
-    width: 25px;
-    height: 25px;
+    margin: 3px;
+    width: 24px;
+    height: 24px;
 }
 
 .icon-btn:hover{

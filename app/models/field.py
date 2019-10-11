@@ -1,6 +1,7 @@
 from bson import ObjectId
 from common.db import (db, ExtendedDocument, ExtendedEmbeddedDocument,
                        DTYPES, ACCEPT_MAX_LEN, ACCEPT_MIN_LEN, ACCEPT_MIN_VAL, ACCEPT_MAX_VAL)
+from common.util import INPUT_TYPES
 
 
 class FieldModel(ExtendedDocument):
@@ -14,7 +15,7 @@ class FieldModel(ExtendedDocument):
 
     name = db.StringField(required=True, max_length=50, default="Untitled Field")
     displayed_text = db.StringField(required=True, max_length=500, default="Untitled Field")
-    data_type = db.StringField(required=True, choices=DTYPES.keys(), default="dynamic")
+    data_type = db.StringField(required=True, choices=INPUT_TYPES, default=INPUT_TYPES[2])
     required = db.BooleanField()
     unique = db.BooleanField()
     unique_with = db.DynamicField()
