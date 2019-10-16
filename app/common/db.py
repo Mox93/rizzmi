@@ -1,3 +1,4 @@
+from bson import ObjectId
 from datetime import datetime
 from flask_mongoengine import MongoEngine
 
@@ -51,23 +52,22 @@ class ExtendedDocument(db.Document):
             if key in result:
                 del result[key]
 
-        if result.get("_id", None):
-            result["_id"] = str(result["_id"])
-
-        if result.get("id", None):
-            result["_id"] = str(result["id"])
-            del result["id"]
+        # if result.get("id", None):
+        #     result["_id"] = str(result["id"])
+        #     del result["id"]
+        # elif result.get("_id", None):
+        #     result["_id"] = str(result["_id"])
 
         for key in result:
-            try:
-                if isinstance(self[key], db.EmbeddedDocument):
-                    result[key]["_id"] = str(result[key].get("_id", "")) or None
-                elif isinstance(self[key], list):
-                    for item in result[key]:
-                        item["_id"] = str(item.get("_id", "")) or None
-            except KeyError as e:
-                # pass
-                print(self, e)
+            # if key != "_id":
+            if isinstance(result[key], ObjectId):
+                result[key] = str(result[key])
+            elif isinstance(self[key], db.EmbeddedDocument):
+                result[key] = self[key].json()
+            elif isinstance(self[key], list):
+                for i, item in enumerate(self[key]):
+                    if isinstance(item, db.EmbeddedDocument):
+                        result[key][i] = item.json()
 
         return result
 
@@ -114,23 +114,22 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
             if key in result:
                 del result[key]
 
-        if result.get("_id", None):
-            result["_id"] = str(result["_id"])
-
-        if result.get("id", None):
-            result["_id"] = str(result["id"])
-            del result["id"]
+        # if result.get("id", None):
+        #     result["_id"] = str(result["id"])
+        #     del result["id"]
+        # elif result.get("_id", None):
+        #     result["_id"] = str(result["_id"])
 
         for key in result:
-            try:
-                if isinstance(self[key], db.EmbeddedDocument):
-                    result[key]["_id"] = str(result[key].get("_id", "")) or None
-                elif isinstance(self[key], list):
-                    for item in result[key]:
-                        item["_id"] = str(item.get("_id", "")) or None
-            except KeyError as e:
-                # pass
-                print(self, e)
+            # if key != "_id":
+            if isinstance(result[key], ObjectId):
+                result[key] = str(result[key])
+            elif isinstance(self[key], db.EmbeddedDocument):
+                result[key] = self[key].json()
+            elif isinstance(self[key], list):
+                for i, item in enumerate(self[key]):
+                    if isinstance(item, db.EmbeddedDocument):
+                        result[key][i] = item.json()
 
         return result
 

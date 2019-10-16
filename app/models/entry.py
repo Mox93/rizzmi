@@ -1,18 +1,44 @@
-from common.db import ExtendedDocument, DTYPES
+from flask_wtf import FlaskForm, RecaptchaField
+from wtforms import StringField, PasswordField, BooleanField
+from wtforms.validators import InputRequired
+from common.db import db, ExtendedDocument, ExtendedEmbeddedDocument, DTYPES
+from models.form import FormModel
 
 
-class EntryModel(object):
+class EntryModel(ExtendedDocument):
     """
-    This Model takes a FormModel and creates an Entry Document class.
+    This Model stores a reference to a form and any pre filled fields
+    """
+    meta = {'collection': 'entries'}
+
+    _form = db.ReferenceField(FormModel, reverse_delete_rule=2, required=True, unique_with="values")
+    # values = db.EmbeddedDocumentField()  # TODO must put something here
+
+    @property
+    def form(self):
+        # TODO convert the FormModel to a form <using wtforms>
+        return self._form
+
+    @form.setter
+    def form(self, value):
+        self._form = value
+
+
+class FormEntry(object):
+    """
+    This Model takes a FormModel and creates a form out of it with fields mapped to the appropriate collection.
     """
 
     _instances = {}
 
+    # Embedded Document Version
+    _embedded = None
+
     def __new__(cls, form):
         _id = str(form.id)
 
-        if EntryModel._instances.get(_id, None):
-            return EntryModel._instances[_id]
+        if cls._instances.get(_id, None):
+            return cls._instances[_id]
 
         attrs = {"meta": {'collection': form.name}}
 
@@ -22,8 +48,8 @@ class EntryModel(object):
             props = field.json(exclude=["name", "data_type"])
             attrs[name] = field_init(**props)
 
-        # TODO create (find_by, clean, ...) methods
+        # TODO create (clean, ...) methods
         class_name = "".join(form.name.title().split("_"))
-        EntryModel._instances[_id] = type(f"{class_name}EntryModel", (ExtendedDocument, ), attrs)
-        return EntryModel._instances[_id]
+        cls._instances[_id] = type(f"{class_name}FormEntry", (ExtendedDocument, ), attrs)
+        return cls._instances[_id]
 

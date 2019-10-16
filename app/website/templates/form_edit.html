@@ -162,7 +162,7 @@
 
           <div class="card-footer d-flex justify-content-end">
             <a class="icon-btn-x mr-1" id="duplicate-{{ i }}" data-toggle="tooltip" data-placement="bottom"
-               title="Duplicate" href="{{ url_for('site.form_field_add', form_id=element.id, field_id=field._id) }}">
+               title="Duplicate" href="{{ url_for('site.form_field_duplicate', form_id=element.id, field_id=field._id) }}">
               <img src="{{ url_for('site.static', filename='assets/copy_outline_gray.svg') }}">
             </a>
 

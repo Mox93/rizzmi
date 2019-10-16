@@ -1,5 +1,4 @@
 from bson import ObjectId
-from datetime import datetime
 from common.db import db, ExtendedDocument
 from models.field import EmbeddedFieldModel, ExtendedEmbeddedDocument
 
@@ -8,20 +7,18 @@ class Connection(ExtendedEmbeddedDocument):
     """
     ...
     """
-    collection = db.StringField(max_length=50)
-
-    def __repr__(self):
-        return self.collection
+    name = db.StringField(required=True, max_length=50, default="Untitled Connection")
+    collection = db.ObjectIdField(required=True, default=ObjectId)
 
 
-class SectionModel(ExtendedDocument):
+class CollectionModel(ExtendedDocument):
     """
     ...
     """
-    meta = {'collection': 'sections'}
+    meta = {'collection': 'collections'}
 
-    name = db.StringField(required=True, max_length=50, default="Untitled Section")
-    title = db.StringField(required=True, max_length=500, default="Untitled Section")
+    name = db.StringField(required=True, max_length=50, default="Untitled Collection")
+    title = db.StringField(required=True, max_length=500, default="Untitled Collection")
     description = db.StringField()
     fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
     db_connection = db.EmbeddedDocumentField(Connection)
@@ -32,7 +29,7 @@ class SectionModel(ExtendedDocument):
     @classmethod
     def as_embedded(cls, *args, **kwargs):
         if not cls._embedded:
-            cls._embedded = type("EmbeddedSectionModel", (ExtendedEmbeddedDocument,),
+            cls._embedded = type("EmbeddedCollectionModel", (ExtendedEmbeddedDocument,),
                                  {"_id": db.ObjectIdField(unique=True, default=ObjectId, sparse=True),
                                   "title": cls.title,
                                   "description": cls.description,
@@ -43,21 +40,24 @@ class SectionModel(ExtendedDocument):
         return cls._embedded
 
 
+EmbeddedCollectionModel = CollectionModel.as_embedded()
+
+
 class FormModel(ExtendedDocument):
     """
-    This Model is for storing created forms.
-    Each form refers to a collection in the database.
+    This Model is for storing form templates.
+    Each form can refer to one or more collections in the database.
     """
     meta = {'collection': 'forms'}
 
-    # TODO divide the Form into sections
+    # TODO divide the form visually into sections
 
     name = db.StringField(required=True, max_length=50, default="Untitled Form")
     title = db.StringField(required=True, max_length=500, default="Untitled Form")
     description = db.StringField()
     fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
-    sections = db.EmbeddedDocumentListField(SectionModel.as_embedded())
-    db_connection = db.EmbeddedDocumentField(Connection)
+    collections = db.ListField(db.ReferenceField(CollectionModel))
+    db_connection = db.EmbeddedDocumentField(Connection, required=True, default=Connection())
 
     def clean(self):
         """
@@ -65,10 +65,13 @@ class FormModel(ExtendedDocument):
         """
 
         if isinstance(self.name, str):
-            self.name = self.name.strip()[:50] or "Untitled Form"
+            self.name = self.name.strip()[:50] or FormModel.name.default
 
         if isinstance(self.title, str):
             self.title = self.title.strip()[:500] or self.name
+
+        if self.name != FormModel.name.default and self.db_connection.name == Connection.name.default:
+            self.db_connection.name = self.name
 
     def find_field_by_id(self, _id, index=False):
         for i, field in enumerate(self.fields):
