@@ -1,7 +1,8 @@
 from datetime import datetime
-import re
 from urllib.parse import urlparse, urljoin
 from flask import request
+import re
+
 
 """
 Container for all the default values throughout the App.
@@ -79,7 +80,7 @@ INPUT_TYPES = ["Short answer",
                "Date",
                "Time"]
 
-_PY_DTYPES = {"bool": bool,
+PY_DTYPES = {"bool": bool,
              "datetime": datetime,
              "dict": dict,
              "dynamic": dynamic,

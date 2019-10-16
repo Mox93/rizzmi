@@ -1,6 +1,3 @@
-from flask_wtf import FlaskForm, RecaptchaField
-from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import InputRequired
 from common.db import db, ExtendedDocument, ExtendedEmbeddedDocument, DTYPES
 from models.form import FormModel
 
@@ -9,19 +6,11 @@ class EntryModel(ExtendedDocument):
     """
     This Model stores a reference to a form and any pre filled fields
     """
+
     meta = {'collection': 'entries'}
 
-    _form = db.ReferenceField(FormModel, reverse_delete_rule=2, required=True, unique_with="values")
-    values = db.EmbeddedDocumentField()  # TODO must put something here
-
-    @property
-    def form(self):
-        # TODO convert the FormModel to a form <using wtforms>
-        return self._form
-
-    @form.setter
-    def form(self, value):
-        self._form = value
+    form = db.ReferenceField(FormModel, reverse_delete_rule=2, required=True)  # , unique_with="values"
+    # values = db.EmbeddedDocumentField()  # TODO must put something here
 
 
 class FormEntry(object):
