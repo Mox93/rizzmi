@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mongoengine import MongoEngineSessionInterface
 from flask_wtf.csrf import CSRFProtect
-from models.developer import DeveloperModel
+from models.user import DeveloperModel
 
 
 app = Flask(__name__)
@@ -26,9 +26,9 @@ app.config["DEBUG"] = True
 app.config["TESTING"] = True
 
 
-import os
+import secrets
 
-app.config["SECRET_KEY"] = os.urandom(24)
+app.config["SECRET_KEY"] = secrets.token_urlsafe(24)
 # app.config["SERVER_NAME"] = "127.0.0.1:5000"
 # app.config["APPLICATION_ROOT"] = "/"
 

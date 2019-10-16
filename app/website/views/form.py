@@ -1,3 +1,4 @@
+from bson import ObjectId
 from flask import render_template, request, redirect, url_for, abort
 from flask_login import login_required
 from flask_wtf import FlaskForm
@@ -21,17 +22,17 @@ def form_list():
 
     if request.method == "POST":
         _id = request.form.get("_id")
-        form = FormModel.find_by_id(_id)
         new_name = request.form.get("new_name")
+        form = FormModel.find_by_id(_id)
 
         if form and new_name:
             form.name = new_name
             form.save()
 
-        return redirect(url_for("site.form_list"))
+        return redirect(url_for("site.form_list"))  # We do this to change the request method from POST to GET
 
     forms = FormModel.find_all(sort_keys=["-_modified_date"])
-    return render_template("list.html", elements=forms, title="Forms")
+    return render_template("form_list.html", elements=forms, title="Forms")
 
 
 @site_bp.route("/forms/delete", methods=["GET", "POST"])
@@ -48,30 +49,27 @@ def form_delete():
     return redirect(url_for("site.form_list"))
 
 
-@site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
 @site_bp.route("/forms/new", methods=["GET", "POST"])
 # @login_required
-def form_edit(_id=None):
+def form_new():
+    fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
+    form = FormModel(fields=fields)
+    form.save()
+    return redirect(url_for("site.form_edit", _id=form.id))
 
-    if not _id:
-        fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
-        form = FormModel(fields=fields)
 
-        # TODO instead of saving just create an id for the from
-        form.save()
-        return redirect(url_for("site.form_edit", _id=form.id))
-
+@site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
+# @login_required
+def form_edit(_id):
     form = FormModel.find_by_id(_id)
 
-    if request.method == "POST":
-
+    if request.method == "POST" and form:
         for field in request.form:
             if hasattr(form, field):
                 setattr(form, field, request.form[field])
 
         form.save()
         return '', 204
-        # return redirect(url_for("site.form_edit", _id=form.id))
 
     if form:
         return render_template("form_edit.html", element=form, d_types=INPUT_TYPES)
@@ -93,33 +91,42 @@ def form_field_edit(form_id, field_id):
 
             form.save()
             return '', 204
-            # return redirect(url_for("site.form_edit", _id=form.id))
 
-    return abort(404)  # redirect(url_for("site.form_edit", _id=form_id))
+    abort(404)
 
 
-@site_bp.route("/forms/<string:form_id>/<string:field_id>/new", methods=["GET", "POST"])
 @site_bp.route("/forms/<string:form_id>/new", methods=["GET", "POST"])
 # @login_required
-def form_field_add(form_id, field_id=None):
+def form_field_add(form_id):
     form = FormModel.find_by_id(form_id)
 
     if form:
         new_field = EmbeddedFieldModel()
 
-        if not field_id:
-            form.fields.append(new_field)
-            form.save()
-            return redirect(url_for("site.form_edit", _id=form.id))
-
-        i, field = form.find_field_by_id(field_id, index=True)
-
-        field_prop = FieldProp(obj=field)
-        field_prop.populate_obj(new_field)
-
-        form.fields.insert(i+1, new_field)
+        form.fields.append(new_field)
         form.save()
         return redirect(url_for("site.form_edit", _id=form.id))
+
+    abort(404)
+
+
+@site_bp.route("/forms/<string:form_id>/<string:field_id>/new", methods=["GET", "POST"])
+# @login_require
+def form_field_duplicate(form_id, field_id):
+    form = FormModel.find_by_id(form_id)
+
+    if form:
+        i, field = form.find_field_by_id(field_id, index=True)
+
+        if field:
+            new_field = EmbeddedFieldModel()
+
+            field_prop = FieldProp(obj=field)
+            field_prop.populate_obj(new_field)
+
+            form.fields.insert(i + 1, new_field)
+            form.save()
+            return redirect(url_for("site.form_edit", _id=form.id))
 
     abort(404)
 
@@ -138,5 +145,5 @@ def form_field_delete(form_id, field_id):
 
             return redirect(url_for("site.form_edit", _id=form.id))
 
-    return abort(404)
+    abort(404)
 

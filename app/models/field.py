@@ -75,9 +75,7 @@ class FieldModel(ExtendedDocument):
         if not cls._embedded:
 
             cls._embedded = type("EmbeddedFieldModel", (ExtendedEmbeddedDocument,),
-                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId, sparse=True),
-
-                                  # TODO to remove the name field we'll need to clear the form collection
+                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId),
                                   "order": db.IntField(required=True, default=0),
                                   "displayed_text": db.StringField(max_length=500),
                                   "data_type": cls.data_type,

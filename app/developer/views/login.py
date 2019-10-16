@@ -5,7 +5,7 @@ from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired
 from werkzeug.security import check_password_hash
 from developer import dev_bp, redirect_auth_user_to
-from models.developer import DeveloperModel
+from models.user import DeveloperModel
 from common.util import is_safe_url
 
 

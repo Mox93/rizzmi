@@ -5,7 +5,7 @@ from wtforms import StringField, PasswordField
 from wtforms.validators import InputRequired, Email, Length, EqualTo
 from werkzeug.security import generate_password_hash
 from developer import dev_bp, redirect_auth_user_to, unique
-from models.developer import DeveloperModel
+from models.user import DeveloperModel
 
 
 class DevRegisterForm(FlaskForm):
