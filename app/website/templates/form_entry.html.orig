@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Entry</title>
+</head>
+<body>
+
+</body>
+</html>
+||||||| merged common ancestors
+=======
 {% import "bootstrap/wtf.html" as wtf %}
 
 <!DOCTYPE html>
@@ -11,26 +24,29 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
         crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('site.static', filename='css/style.css') }}">
 
-  <title> Rizzmi Team Login </title>
+  <title>Form Entry</title>
 </head>
 
 <body>
-<div class="card my-5 mx-auto" style="max-width: 25rem;">
-  <h3 class="card-header text-center text-white", style="background-color: green;">
-    Rizzni Team Login
+
+<div class="card my-5 mx-auto" style="width: 50rem;">
+  <h3 class="text-white", style="background-color: green;">
+    {{ element.title }}
   </h3>
+
+  <p> {{ element.description }} </p>
+
   <div class="card-body">
-    <form method="post" action="{{ url_for('dev.login') }}">
+    <form method="post" action="{{ url_for('site.form_entry', _id=element.links[0]) }}">
       <p style="color:red;"> {{ error_msg }} </p>
       <dl>
         {{ wtf.quick_form(form) }}
-        <input class="btn text-white" style="background-color: green;" type="submit" value="Log In">
+        <input class="btn text-white" style="background-color: green;" type="submit" value="Submit">
       </dl>
     </form>
-  </div>
-  <div class="card-footer text-muted">
-    Don't have an account yet? <a href="{{ url_for('dev.register') }}">Register</a> now.
   </div>
 </div>
 
@@ -43,6 +59,8 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for('site.static', filename='js/app.js') }}"></script>
 
 </body>
 </html>
+>>>>>>> website

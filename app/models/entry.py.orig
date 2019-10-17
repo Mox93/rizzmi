@@ -6,6 +6,19 @@ class EntryModel(ExtendedDocument):
     """
     This Model stores a reference to a form and any pre filled fields
     """
+<<<<<<< HEAD
+    meta = {'collection': 'entries'}
+
+    _form = db.ReferenceField(FormModel, reverse_delete_rule=2, required=True, unique_with="values")
+    # values = db.EmbeddedDocumentField()  # TODO must put something here
+||||||| merged common ancestors
+    meta = {'collection': 'entries'}
+
+    _form = db.ReferenceField(FormModel, reverse_delete_rule=2, required=True, unique_with="values")
+    values = db.EmbeddedDocumentField()  # TODO must put something here
+=======
+>>>>>>> website
+
     meta = {'collection': 'entries'}
 
     form = db.ReferenceField(FormModel, reverse_delete_rule=2, required=True)  # , unique_with="values"

@@ -6,6 +6,7 @@ from wtforms import StringField, TextAreaField, BooleanField, SelectField
 from website import site_bp
 from models.form import FormModel
 from models.field import EmbeddedFieldModel
+from models.entry import EntryModel
 from common.util import INPUT_TYPES
 
 
@@ -56,6 +57,13 @@ def form_new():
     form = FormModel(fields=fields)
     # TODO if possible try not to keep unedited new forms
     form.save()
+
+    entry = EntryModel(form=form)
+    entry.save()
+
+    form.links = [str(entry.id)]
+    form.save()
+
     return redirect(url_for("site.form_edit", _id=form.id))
 
 
@@ -143,7 +151,6 @@ def form_field_delete(form_id, field_id):
         if field:
             form.fields.pop(i)
             form.save()
-
             return redirect(url_for("site.form_edit", _id=form.id))
 
     abort(404)

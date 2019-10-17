@@ -80,12 +80,18 @@ INPUT_TYPES = ["Short answer",
                "Date",
                "Time"]
 
+<<<<<<< HEAD
 URL_MAP = []
 # URL_MAP.append
 
 ENDPOINT_MAP = {}
 
 PY_DTYPES = {"bool": bool,
+||||||| merged common ancestors
+_PY_DTYPES = {"bool": bool,
+=======
+PY_DTYPES = {"bool": bool,
+>>>>>>> website
              "datetime": datetime,
              "dict": dict,
              "dynamic": dynamic,

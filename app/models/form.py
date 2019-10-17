@@ -58,6 +58,7 @@ class FormModel(ExtendedDocument):
     fields = db.EmbeddedDocumentListField(EmbeddedFieldModel)
     collections = db.ListField(db.ReferenceField(CollectionModel))
     db_connection = db.EmbeddedDocumentField(Connection, required=True, default=Connection())
+    links = db.ListField(db.StringField())
 
     def clean(self):
         """

@@ -13,7 +13,7 @@ class FieldModel(ExtendedDocument):
 
     # TODO implement tags
 
-    name = db.StringField(required=True, max_length=50, default="Untitled Field")
+    name = db.StringField(required=True, max_length=50, default="untitled_field")
     displayed_text = db.StringField(required=True, max_length=500, default="Untitled Field")
     data_type = db.StringField(required=True, choices=INPUT_TYPES, default=INPUT_TYPES[2])
     required = db.BooleanField()
@@ -65,10 +65,10 @@ class FieldModel(ExtendedDocument):
             raise db.ValidationError(msg)
 
         if isinstance(self.name, str):
-            self.name = self.name[:50] or "Untitled Field"
+            self.name = "_".join(self.name.lower().split(" "))[:50] or FieldModel.name.default
 
         if isinstance(self.displayed_text, str):
-            self.displayed_text = self.displayed_text[:500] or self.name
+            self.displayed_text = self.displayed_text[:500] or FieldModel.displayed_text.default
 
     @classmethod
     def as_embedded(cls, *args, **kwargs):
