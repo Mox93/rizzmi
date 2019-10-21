@@ -5,5 +5,5 @@ site_bp = Blueprint("site", __name__, template_folder="templates", static_folder
                     static_url_path="/website/static")
 
 # from website.views import registration
-from website.views import homepage, form, collection, field, entry
+from website.views import homepage, form, collection, field
 

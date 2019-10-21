@@ -6,43 +6,27 @@ db = MongoEngine()
 
 
 class ExtendedDocument(db.Document):
+    """
+    The base for all documents in the project
+    Contains the following additional features:
+        - creation_date:    the time the document was created  ## UTC
+        - modified_date:    the last time the document was modified  ## UTC
+        - json:             returns a dict-like representation of the document
+        - find_by_id:       a basic search by id
+        - find_one_by:      returns the firs document which has the given field-name with the required value
+        - find_many_by:     returns all documents which has the given field-name with the required value
+        - find_all:         returns all documents
+    """
+
     meta = {"abstract": True}
 
-    _creation_date = db.DateTimeField()
-    _modified_date = db.DateTimeField(default=datetime.now)
-
-    @property
-    def creation_date(self, raw=False):
-        if raw:
-            return self._creation_date
-
-        if self._creation_date.day == datetime.now().day:
-            return self._creation_date.strftime("%I:%M %p")
-
-        return self._creation_date.strftime("%b %d, %Y")
-
-    @creation_date.setter
-    def creation_date(self, value):
-        self._creation_date = value
-
-    @property
-    def modified_date(self, raw=False):
-        if raw:
-            return self._modified_date
-
-        if self._modified_date.day == datetime.now().day:
-            return self._modified_date.strftime("%I:%M %p")
-
-        return self._modified_date.strftime("%b %d, %Y")
-
-    @modified_date.setter
-    def modified_date(self, value):
-        self._modified_date = value
+    creation_date = db.DateTimeField()
+    modified_date = db.DateTimeField(default=datetime.utcnow)
 
     def save(self, *args, **kwargs):
-        if not self._creation_date:
-            self._creation_date = datetime.now()
-        self._modified_date = datetime.now()
+        if not self.creation_date:
+            self.creation_date = datetime.utcnow()
+        self.modified_date = datetime.utcnow()
         return super(ExtendedDocument, self).save(*args, **kwargs)
 
     def json(self, exclude=tuple()):
@@ -52,14 +36,7 @@ class ExtendedDocument(db.Document):
             if key in result:
                 del result[key]
 
-        # if result.get("id", None):
-        #     result["_id"] = str(result["id"])
-        #     del result["id"]
-        # elif result.get("_id", None):
-        #     result["_id"] = str(result["_id"])
-
         for key in result:
-            # if key != "_id":
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
@@ -75,23 +52,26 @@ class ExtendedDocument(db.Document):
     def find_by_id(cls, _id):
         try:
             return cls.objects(id=_id).first()
-        except:
+        except Exception as e:
+            print(str(e))
             return
 
     @classmethod
-    def find_one_by(cls, name, value):
+    def find_one_by(cls, field_name, value):
         try:
-            return cls.objects(**{name: value}).first()
-        except:
+            return cls.objects(**{field_name: value}).first()
+        except Exception as e:
+            print(str(e))
             return
 
     @classmethod
-    def find_many_by(cls, name, value, sort_keys=tuple()):
+    def find_many_by(cls, field_name, value, sort_keys=tuple()):
         try:
             if sort_keys and isinstance(sort_keys, (tuple, list, set)):
-                return cls.objects(**{name: value}).order_by(*sort_keys)
-            return cls.objects(**{name: value})
-        except:
+                return cls.objects(**{field_name: value}).order_by(*sort_keys)
+            return cls.objects(**{field_name: value})
+        except Exception as e:
+            print(str(e))
             return []
 
     @classmethod
@@ -100,12 +80,42 @@ class ExtendedDocument(db.Document):
             if sort_keys and isinstance(sort_keys, (tuple, list, set)):
                 return cls.objects().order_by(*sort_keys)
             return cls.objects()
-        except:
+        except Exception as e:
+            print(str(e))
             return []
 
 
+class ExtendedDynamicDocument(db.DynamicDocument, ExtendedDocument):
+    """
+    The base for all dynamic documents in the project
+    Contains the following additional features:
+        - creation_date:    the time the document was created  ## UTC
+        - modified_date:    the last time the document was modified  ## UTC
+        - json:             returns a dict-like representation of the document
+        - find_by_id:       a basic search by id
+        - find_one_by:      returns the firs document which has the given field-name with the required value
+        - find_many_by:     returns all documents which has the given field-name with the required value
+        - find_all:         returns all documents
+    """
+
+    pass
+
+
 class ExtendedEmbeddedDocument(db.EmbeddedDocument):
+    """
+    The base for all embedded documents in the project
+    Contains the following additional features:
+        - _id:              an ObjectId
+        - json:             returns a dict-like representation of the document
+        - find_by_id:       a basic search by id
+        - find_one_by:      returns the firs document which has the given field-name with the required value
+        - find_many_by:     returns all documents which has the given field-name with the required value
+        - find_all:         returns all documents
+    """
+
     meta = {"abstract": True}
+
+    _id = db.ObjectIdField(required=True, default=ObjectId)
 
     def json(self, exclude=tuple()):
         result = self.to_mongo()
@@ -114,14 +124,7 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
             if key in result:
                 del result[key]
 
-        # if result.get("id", None):
-        #     result["_id"] = str(result["id"])
-        #     del result["id"]
-        # elif result.get("_id", None):
-        #     result["_id"] = str(result["_id"])
-
         for key in result:
-            # if key != "_id":
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
@@ -133,28 +136,40 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
 
         return result
 
-    def delete_by_id(self, value):
-        self.objects.update(__raw__={"$pull": {"_id": value}})
-
     @classmethod
     def find_by_id(cls, _id):
         try:
-            return cls.objects(id=_id).first()
-        except:
+            return cls.objects(_id=_id).first()
+        except Exception as e:
+            print(str(e))
             return
 
     @classmethod
-    def find_by(cls, field_name, value):
+    def find_one_by(cls, field_name, value):
         try:
             return cls.objects(**{field_name: value}).first()
-        except:
+        except Exception as e:
+            print(str(e))
             return
 
     @classmethod
-    def find_all(cls):
+    def find_many_by(cls, field_name, value, sort_keys=tuple()):
         try:
+            if sort_keys and isinstance(sort_keys, (tuple, list, set)):
+                return cls.objects(**{field_name: value}).order_by(*sort_keys)
+            return cls.objects(**{field_name: value})
+        except Exception as e:
+            print(str(e))
+            return []
+
+    @classmethod
+    def find_all(cls, sort_keys=tuple()):
+        try:
+            if sort_keys and isinstance(sort_keys, (tuple, list, set)):
+                return cls.objects().order_by(*sort_keys)
             return cls.objects()
-        except:
+        except Exception as e:
+            print(str(e))
             return []
 
 
@@ -181,8 +196,4 @@ ACCEPT_MAX_LEN = ["str", "list", "email"]
 ACCEPT_MIN_LEN = ["str", "email"]
 ACCEPT_MIN_VAL = ["int", "float"]
 ACCEPT_MAX_VAL = ["int", "float"]
-
-
-if __name__ == "__main__":
-    print("Hello Mongo!")
 

@@ -1,18 +1,16 @@
-from bson import ObjectId
 from flask import render_template, request, redirect, url_for, abort
 from flask_login import login_required
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField
+from wtforms.validators import InputRequired
 from website import site_bp
-from models.form import FormModel
+from models.form import FormTemplateModel, FormMapModel
 from models.field import EmbeddedFieldModel
-from models.entry import EntryModel
-from common.util import INPUT_TYPES
 
 
 class FieldProp(FlaskForm):
     displayed_text = StringField("Question")
-    data_type = SelectField("Input Type", choices=INPUT_TYPES)
+    input_type = SelectField("Input Type", choices=EmbeddedFieldModel.input_type.choices)
     help_text = TextAreaField("Description")
     required = BooleanField("Required")
 
@@ -24,7 +22,7 @@ def form_list():
     if request.method == "POST":
         _id = request.form.get("_id")
         new_name = request.form.get("new_name")
-        form = FormModel.find_by_id(_id)
+        form = FormTemplateModel.find_by_id(_id)
 
         if form and new_name:
             form.name = new_name
@@ -32,7 +30,7 @@ def form_list():
 
         return redirect(url_for("site.form_list"))  # We do this to change the request method from POST to GET
 
-    forms = FormModel.find_all(sort_keys=["-_modified_date"])
+    forms = FormTemplateModel.find_all(sort_keys=["-_modified_date"])
     return render_template("form_list.html", elements=forms, title="Forms")
 
 
@@ -42,7 +40,7 @@ def form_delete():
 
     if request.method == "POST":
         _id = request.form.get("_id")
-        form = FormModel.find_by_id(_id)
+        form = FormTemplateModel.find_by_id(_id)
 
         if form:
             form.delete()
@@ -53,14 +51,14 @@ def form_delete():
 @site_bp.route("/forms/new", methods=["GET", "POST"])
 # @login_required
 def form_new():
-    fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
-    form = FormModel(fields=fields)
+    fields = [EmbeddedFieldModel(question="Untitled Question")]
+    form = FormTemplateModel(fields=fields)
     form.save()
 
-    entry = EntryModel(form=form)
+    entry = FormMapModel(form=form)
     entry.save()
 
-    form.links = [str(entry.id)]
+    form.links = [entry.id]
     form.save()
 
     return redirect(url_for("site.form_edit", _id=form.id))
@@ -69,7 +67,7 @@ def form_new():
 @site_bp.route("/forms/<string:_id>", methods=["GET", "POST"])
 # @login_required
 def form_edit(_id):
-    form = FormModel.find_by_id(_id)
+    form = FormTemplateModel.find_by_id(_id)
 
     if request.method == "POST" and form:
         for field in request.form:
@@ -80,7 +78,8 @@ def form_edit(_id):
         return '', 204
 
     if form:
-        return render_template("form_edit.html", element=form, d_types=INPUT_TYPES)
+        return render_template("form_edit.html", element=form,
+                               input_types=EmbeddedFieldModel.input_type.choices)
 
     abort(404)
 
@@ -90,7 +89,7 @@ def form_edit(_id):
 def form_field_edit(form_id, field_id):
 
     if request.method == "POST":
-        form = FormModel.find_by_id(form_id)
+        form = FormTemplateModel.find_by_id(form_id)
         field = form.find_field_by_id(field_id) if form else None
 
         if field:
@@ -106,7 +105,7 @@ def form_field_edit(form_id, field_id):
 @site_bp.route("/forms/<string:form_id>/new", methods=["GET", "POST"])
 # @login_required
 def form_field_add(form_id):
-    form = FormModel.find_by_id(form_id)
+    form = FormTemplateModel.find_by_id(form_id)
 
     if form:
         new_field = EmbeddedFieldModel()
@@ -121,7 +120,7 @@ def form_field_add(form_id):
 @site_bp.route("/forms/<string:form_id>/<string:field_id>/new", methods=["GET", "POST"])
 # @login_require
 def form_field_duplicate(form_id, field_id):
-    form = FormModel.find_by_id(form_id)
+    form = FormTemplateModel.find_by_id(form_id)
 
     if form:
         i, field = form.find_field_by_id(field_id, index=True)
@@ -142,7 +141,7 @@ def form_field_duplicate(form_id, field_id):
 @site_bp.route("/forms/<string:form_id>/<string:field_id>/delete", methods=["GET", "POST"])
 # @login_required
 def form_field_delete(form_id, field_id):
-    form = FormModel.find_by_id(form_id)
+    form = FormTemplateModel.find_by_id(form_id)
 
     if form:
         i, field = form.find_field_by_id(field_id, index=True)
@@ -153,4 +152,31 @@ def form_field_delete(form_id, field_id):
             return redirect(url_for("site.form_edit", _id=form.id))
 
     abort(404)
+
+
+@site_bp.route("/forms/<string:_id>/entry", methods=["GET", "POST"])
+def form_entry(_id):
+    class F(FlaskForm):
+        pass
+
+    entry = FormMapModel.find_by_id(_id)
+
+    for field in entry.form.fields:
+        validators = []
+        if field.required:
+            validators.append(InputRequired())
+
+        setattr(F, f"field_{field._id}", StringField(field.question or "", validators=validators))
+
+    form = F()
+
+    if request.method == "POST":
+        return redirect(url_for("site.form_reply", _id=_id))
+
+    return render_template("form_entry.html", form=form, element=entry.form)
+
+
+@site_bp.route("/forms/<string:_id>/reply", methods=["GET", "POST"])
+def form_reply(_id):
+    return "<h2> Thank you form filling in the form </h2>"
 

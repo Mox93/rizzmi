@@ -16,7 +16,7 @@
    version="1.1"
    id="svg8"
    sodipodi:docname="rizzmi.svg"
-   inkscape:version="0.92.4 (f8dce91, 2019-08-02)">
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -27,17 +27,17 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.02"
-     inkscape:cx="-2362.6598"
-     inkscape:cy="12189.615"
+     inkscape:cx="-4108.204"
+     inkscape:cy="8617.4377"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:window-width="1366"
-     inkscape:window-height="704"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-height="745"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:snap-global="true" />
   <metadata
@@ -62,8 +62,8 @@
        width="7600.4336"
        id="rect1055"
        style="opacity:1;fill:#c87137;fill-opacity:1;stroke:none;stroke-width:2.64583349;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       inkscape:export-xdpi="66.837509"
-       inkscape:export-ydpi="66.837509"
+       inkscape:export-xdpi="20.051489"
+       inkscape:export-ydpi="20.051489"
        inkscape:export-filename="/home/mohamed/rizzmi_construction_5x10.png" />
     <rect
        style="opacity:1;fill:#d38d5f;fill-opacity:1;stroke:none;stroke-width:2.64583349;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -141,11 +141,15 @@
        width="2280"
        height="1080"
        x="-5539.3428"
-       y="-1532.6102" />
+       y="-1532.6102"
+       inkscape:export-xdpi="18.062222"
+       inkscape:export-ydpi="18.062222" />
     <g
        style="stroke-width:0.02794447"
        id="g1127"
-       transform="matrix(35.785243,0,0,35.785243,1134.5749,-3306.4277)">
+       transform="matrix(35.785243,0,0,35.785243,1134.5749,-3306.4277)"
+       inkscape:export-xdpi="18.062222"
+       inkscape:export-ydpi="18.062222">
       <path
          sodipodi:nodetypes="ccccssccssc"
          inkscape:connector-curvature="0"

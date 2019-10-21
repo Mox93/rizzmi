@@ -4,10 +4,17 @@ from bson import ObjectId
 
 
 class UserModel(UserMixin, ExtendedDocument):
+    """
+    The basic common information for all users of the webapp.
+    Inherits from UserMixin so it could be used with Flask-Login.
+    To add user-roles specific data this document should be inherited.
+    ** username and email are case-insensitive
+    """
+
     meta = {'collection': 'users',
             'allow_inheritance': True}
 
-    username = db.StringField(required=True, max_length=25, unique=True)
+    username = db.StringField(required=True, max_length=50, unique=True)
     email = db.EmailField(required=True, unique=True)
     password = db.StringField(required=True, max_length=80)
     session_id = db.ObjectIdField(required=True, unique=True, default=ObjectId)
@@ -16,6 +23,9 @@ class UserModel(UserMixin, ExtendedDocument):
         return str(self.session_id)
 
     def clean(self):
+        """
+        Insures that username and email are lowercase.
+        """
 
         if isinstance(self.username, str):
             self.username = self.username.lower()
