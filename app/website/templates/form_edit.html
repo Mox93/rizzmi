@@ -116,8 +116,8 @@
           <div class="col-md-7 driver">
             <label for="txt-{{ i }}" class="sr-only">Question</label>
             <input type="text" class="form-control-plaintext h5 u-line-input pb-0 form-prop"
-                   id="txt-{{ i }}" placeholder="Question" name="displayed_text"
-                   {% if field.displayed_text %} value="{{ field.displayed_text }}" {% endif %}
+                   id="txt-{{ i }}" placeholder="Question" name="question"
+                   {% if field.question %} value="{{ field.question }}" {% endif %}
                    onchange="this.form.submit()">
           </div>
 
@@ -130,12 +130,12 @@
           </div>
 
           <div class="col-md-4 dropdown">
-            <label for="dtype-{{ i }}" class="sr-only">Input Type</label>
-            <select class="custom-select" id="dtype-{{ i }}" name="data_type"
-                    onchange="change_dtype(this, {{ i }}, value);">
-              {% for d_type in d_types %}
-              <option value="{{ d_type }}" {% if field.data_type == d_type %} selected {% endif %}>
-                {{ d_type }}
+            <label for="intype-{{ i }}" class="sr-only">Input Type</label>
+            <select class="custom-select" id="intype-{{ i }}" name="input_type"
+                    onchange="change_intype(this, {{ i }}, value);">
+              {% for input_type in input_types %}
+              <option value="{{ input_type }}" {% if field.input_type == input_type %} selected {% endif %}>
+                {{ input_type }}
               </option>
               {% endfor %}
             </select>
@@ -148,10 +148,10 @@
 
           <div class="card-body">
             <div class="d-type-prop">
-              {% for d_type in d_types %}
-              <div class="prop" id="{{ d_type }}{{ i }}"
-                   {% if field.data_type != d_type %} style="display: none;" {% endif %}>
-                <h3>{{ d_type }}</h3>
+              {% for input_type in input_types %}
+              <div class="prop" id="{{ input_type }}{{ i }}"
+                   {% if field.input_type != input_type %} style="display: none;" {% endif %}>
+                <h3>{{ input_type }}</h3>
               </div>
               {% endfor %}
             </div>

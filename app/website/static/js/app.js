@@ -107,15 +107,15 @@ $('#deleteModal').on('show.bs.modal', function (event) {
     modal.find('#del-element-id').val(_id)
 });
 
-function change_dtype(e, i) {
+function change_intype(e, i) {
     e.form.submit();
 
-    var id0 = "#dtype-" + i;
-    var d_type = $(id0 + " option:selected").val();
+    var id0 = "#intype-" + i;
+    var input_type = $(id0 + " option:selected").val();
     var prop = $(e.form).find(".prop");
 
     for (x = 0; x < prop.length; x++) {
-        if (d_type+i == prop[x].id) {
+        if (input_type+i == prop[x].id) {
             $(prop[x]).css("display", "block");
         } else {
             $(prop[x]).css("display", "none");
@@ -145,5 +145,3 @@ function title_submit(e) {
     e.form.submit();
 }
 
-
-/*-------------------------------------------------------*/

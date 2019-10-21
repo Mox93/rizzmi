@@ -1,27 +1,45 @@
 from bson import ObjectId
+from common.util import INPUT_TYPES
 from common.db import (db, ExtendedDocument, ExtendedEmbeddedDocument,
                        DTYPES, ACCEPT_MAX_LEN, ACCEPT_MIN_LEN, ACCEPT_MIN_VAL, ACCEPT_MAX_VAL)
-from common.util import INPUT_TYPES
 
 
 class FieldModel(ExtendedDocument):
     """
-    This Model is the main building block used to create Forms.
+    The main building block used in creating Forms.
     Its purpose is to store created fields for future reuse.
+    The main fields are:
+        - name:
+        - question:     what will appear in forms
+        - data_type:    the value type that will be stored in the database
+        - input_type:   the method of inputting the value in forms
+        - required:     a boolean
+        - unique:       a boolean
+        - unique_with:  a list of fields that when combined must be unique
+        - primary_key:  will make the field required and unique  ## shouldn't be used for now
+        - choices:      a list of values that the field-value must be one of
+        - description:  some explanation on why or how to fill-in the field
+        ===============
+        - max_length:   only used if the field data type allows it
+        - min_length:   only used if the field data type allows it
+        - max_value:    only used if the field data type allows it
+        - min_value:    only used if the field data type allows it
    """
+
     meta = {'collection': 'fields'}
 
     # TODO implement tags
 
     name = db.StringField(required=True, max_length=50, default="untitled_field")
-    displayed_text = db.StringField(required=True, max_length=500, default="Untitled Field")
-    data_type = db.StringField(required=True, choices=INPUT_TYPES, default=INPUT_TYPES[2])
+    question = db.StringField(max_length=500)
+    data_type = db.StringField(required=True, choices=DTYPES.keys(), default="dynamic")
+    input_type = db.StringField(choices=INPUT_TYPES, default=INPUT_TYPES[0])
     required = db.BooleanField()
     unique = db.BooleanField()
     unique_with = db.DynamicField()
     primary_key = db.BooleanField()
     choices = db.DynamicField()
-    help_text = db.StringField()
+    description = db.StringField()
 
     # Data-type dependent attributes
     max_length = db.IntField()
@@ -35,10 +53,10 @@ class FieldModel(ExtendedDocument):
 
     def clean(self):
         """
-        * Ensures that only data types which accept max/min_length/value have them and
+        Ensures that only data types which accept max/min_length/value have them and
         that min is always less than max.
-        * Converts 'name' to lowercase.
-        * Assignees a titled version of 'name' to displayed_text if nothing is assigned to it.
+        Converts 'name' to lowercase with '_' instead of spaces and trims it to its maximum length.
+        Trims 'question' to its maximum length.
         """
         if self.data_type not in ACCEPT_MAX_LEN and self.max_length is not None:
             msg = f"The data_type '{self.data_type}' can't have a maximum length!"
@@ -65,33 +83,51 @@ class FieldModel(ExtendedDocument):
             raise db.ValidationError(msg)
 
         if isinstance(self.name, str):
-            self.name = "_".join(self.name.lower().split(" "))[:50] or FieldModel.name.default
+            n = FieldModel.name.max_length
+            self.name = "_".join(self.name.lower().split(" "))[:n] or FieldModel.name.default
 
-        if isinstance(self.displayed_text, str):
-            self.displayed_text = self.displayed_text[:500] or FieldModel.displayed_text.default
+        if isinstance(self.question, str):
+            n = FieldModel.question.max_length
+            self.question = self.question[:n]
+
+    def __repr__(self):
+        return f"<Field name: {self.name} question: {self.question}>"
 
     @classmethod
     def as_embedded(cls, *args, **kwargs):
+        """
+        In order to use fields inside of forms we need to convert them into embedded documents.
+        This is done to separate them from the original field so they don't mutate each other.
+        ** some attributes are added to store information about the collection and form they belong to.
+        ** passing nothing to this function will return the EmbeddedFieldModel class,
+        ** while passing args and/or kwargs will return an EmbeddedFieldModel instance.
+        :param args:
+        :param kwargs:
+        :return EmbeddedFieldModel:
+        """
         if not cls._embedded:
 
             cls._embedded = type("EmbeddedFieldModel", (ExtendedEmbeddedDocument,),
-                                 {"_id": db.ObjectIdField(unique=True, default=ObjectId),
-                                  "order": db.IntField(required=True, default=0),
-                                  "displayed_text": db.StringField(max_length=500),
+                                 {"order": db.IntField(required=True, default=-1),
+                                  "question": cls.question,
                                   "data_type": cls.data_type,
+                                  "input_type": cls.input_type,
                                   "required": cls.required,
                                   "unique": cls.unique,
                                   "unique_with": cls.unique_with,
                                   "primary_key": cls.primary_key,
                                   "choices": cls.choices,
-                                  "help_text": cls.help_text,
+                                  "description": cls.description,
                                   "max_length": cls.max_length,
                                   "min_length": cls.min_length,
                                   "min_value": cls.min_value,
-                                  "max_value": cls.max_value})
-                                  # "clean": cls.clean})
+                                  "max_value": cls.max_value,
+                                  "collection": db.ObjectIdField(),
+                                  "__repr__": lambda self: f"<Field question: {self.question}>"})
+
         if args or kwargs:
             return cls._embedded(*args, **kwargs)
+
         return cls._embedded
 
 

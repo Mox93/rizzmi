@@ -51,8 +51,17 @@ def form_delete():
 @site_bp.route("/forms/new", methods=["GET", "POST"])
 # @login_required
 def form_new():
+<<<<<<< HEAD
+    fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
+    form = FormModel(fields=fields)
+    # TODO if possible try not to keep unedited new forms
+||||||| merged common ancestors
+    fields = [EmbeddedFieldModel(displayed_text="Untitled Question")]
+    form = FormModel(fields=fields)
+=======
     fields = [EmbeddedFieldModel(question="Untitled Question")]
     form = FormTemplateModel(fields=fields)
+>>>>>>> website
     form.save()
 
     entry = FormMapModel(form=form)

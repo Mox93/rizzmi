@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="{{ url_for('site.static', filename='css/style.css') }}">
 
-  <title>Form Entry</title>
+  <title>{{ element.title }}</title>
 </head>
 
 <body>
@@ -24,7 +24,7 @@
     {{ element.title }}
   </h3>
 
-  <p> {{ element.description }} </p>
+  <p> {% if element.description %} {{ element.description }} {% endif %} </p>
 
   <div class="card-body">
     <form method="post" action="{{ url_for('site.form_entry', _id=element.links[0]) }}">
