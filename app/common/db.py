@@ -1,6 +1,5 @@
 from bson import ObjectId
 from datetime import datetime
-from dateutil import tz
 from flask_mongoengine import MongoEngine
 
 db = MongoEngine()
