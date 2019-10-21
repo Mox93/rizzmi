@@ -6,7 +6,7 @@ from flask_admin.contrib.mongoengine import ModelView
 from flask_login import current_user
 from wtforms.validators import ValidationError
 from models.user import DeveloperModel
-from models.form import FormModel, CollectionModel
+from models.form import FormTemplateModel, CollectionTemplateModel
 from models.field import FieldModel
 from app import app
 
@@ -57,8 +57,8 @@ from developer.views.homepage import DevHomeView
 admin = Admin(app, name="Rizzmi Team", template_mode='bootstrap3',
               index_view=DevHomeView(url="/dev", template="dev/homepage.html"))
 
-admin.add_view(ExtendedModelView(FormModel, name="Forms", endpoint="forms"))
-admin.add_view(ExtendedModelView(CollectionModel, name="Collections", endpoint="collection"))
+admin.add_view(ExtendedModelView(FormTemplateModel, name="Forms", endpoint="forms"))
+admin.add_view(ExtendedModelView(CollectionTemplateModel, name="Collections", endpoint="collection"))
 admin.add_view(ExtendedModelView(FieldModel, name="Fields", endpoint="fields"))
 admin.add_view(DevProfileView(name="Profile", endpoint="profile", category="Go To"))
 
