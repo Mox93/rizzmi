@@ -108,7 +108,7 @@ class FieldModel(ExtendedDocument):
         if not cls._embedded:
 
             cls._embedded = type("EmbeddedFieldModel", (ExtendedEmbeddedDocument,),
-                                 {"order": db.IntField(required=True, default=-1),
+                                 {"index": db.IntField(required=True, default=-1),
                                   "question": cls.question,
                                   "data_type": cls.data_type,
                                   "input_type": cls.input_type,

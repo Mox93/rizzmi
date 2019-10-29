@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, abort
+from flask import render_template, request, redirect, url_for, abort, jsonify
 from flask_login import login_required
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField
@@ -9,9 +9,9 @@ from models.field import EmbeddedFieldModel
 
 
 class FieldProp(FlaskForm):
-    displayed_text = StringField("Question")
+    question = StringField("Question")
     input_type = SelectField("Input Type", choices=EmbeddedFieldModel.input_type.choices)
-    help_text = TextAreaField("Description")
+    description = TextAreaField("Description")
     required = BooleanField("Required")
 
 
@@ -179,4 +179,25 @@ def form_entry(_id):
 @site_bp.route("/forms/<string:_id>/reply", methods=["GET", "POST"])
 def form_reply(_id):
     return "<h2> Thank you form filling in the form </h2>"
+
+# ============================================================================
+
+
+@site_bp.route("/forms-json/<string:_id>", methods=["GET", "POST"])
+# @login_required
+def form_edit_json(_id):
+    form = FormTemplateModel.find_by_id(_id)
+
+    if form:
+        if request.method == "POST":
+            for field in request.get_json():
+                if hasattr(form, field):
+                    setattr(form, field, request.get_json()[field])
+
+            form.save()
+
+        return jsonify(form.json()), 200
+
+    abort(404)
+
 

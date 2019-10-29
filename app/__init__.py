@@ -13,7 +13,7 @@ Bootstrap(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "dev.login"
 
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 
 
 @login_manager.user_loader

@@ -32,19 +32,25 @@ class ExtendedDocument(db.Document):
     def json(self, exclude=tuple()):
         result = self.to_mongo()
 
+        pass_on = []
+
         for key in exclude:
             if key in result:
                 del result[key]
+            else:
+                pass_on.append(key)
 
         for key in result:
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
-                result[key] = self[key].json()
+                result[key] = self[key].json(exclude=pass_on)
             elif isinstance(self[key], list):
                 for i, item in enumerate(self[key]):
-                    if isinstance(item, db.EmbeddedDocument):
-                        result[key][i] = item.json()
+                    if isinstance(result[key][i], ObjectId):
+                        result[key][i] = str(result[key][i])
+                    elif isinstance(item, db.EmbeddedDocument):
+                        result[key][i] = item.json(exclude=pass_on)
 
         return result
 
@@ -120,19 +126,25 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
     def json(self, exclude=tuple()):
         result = self.to_mongo()
 
+        pass_on = []
+
         for key in exclude:
             if key in result:
                 del result[key]
+            else:
+                pass_on.append(key)
 
         for key in result:
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
-                result[key] = self[key].json()
+                result[key] = self[key].json(exclude=pass_on)
             elif isinstance(self[key], list):
                 for i, item in enumerate(self[key]):
-                    if isinstance(item, db.EmbeddedDocument):
-                        result[key][i] = item.json()
+                    if isinstance(result[key][i], ObjectId):
+                        result[key][i] = str(result[key][i])
+                    elif isinstance(item, db.EmbeddedDocument):
+                        result[key][i] = item.json(exclude=pass_on)
 
         return result
 
