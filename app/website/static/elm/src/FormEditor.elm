@@ -1,12 +1,13 @@
 module FormEditor exposing (..)
 
 import Browser
-import FieldEditor exposing (..)
+import FieldEditor as FE exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Http exposing (..)
-import Json.Decode as JD
+import Http exposing (Body, jsonBody)
+import Json.Decode as JD exposing (Decoder, list, string)
+import Json.Decode.Pipeline as JDP exposing (hardcoded, required)
 import Json.Encode as JE
 
 
@@ -27,45 +28,59 @@ main =
 -- MODEL
 
 
-type alias IndexedField =
-    { idx : Int
-    , field : FieldEditor.Model
-    }
+type FormStatus
+    = Loading
+    | Success
+    | Failure
 
 
 type alias Model =
-    { name : String
+    { id : String
+    , name : String
     , title : String
     , description : String
-    , fields : List IndexedField
-    , nextIdx : Int
+    , fields : List FE.Model
+    , status : FormStatus
+    }
+
+
+type alias MainInfo r =
+    { r
+        | name : String
+        , title : String
+        , description : String
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     let
-        fieldList : List IndexedField
+        fieldList : List FE.Model
         fieldList =
-            [ { idx = 0
-              , field =
-                    { question = "Untitled Question"
-                    , description = ""
-                    , answerMethod = defaultAnswerMethod
-                    , required = False
-                    , expanded = True
-                    }
+            [ { id = ""
+              , index = 0
+              , question = "Untitled Question"
+              , description = ""
+              , answerMethod = defaultAnswerMethod
+              , required = False
+              , expanded = True
               }
             ]
     in
-    ( { name = "Untitled Form"
+    ( { id = ""
+      , name = "Untitled Form"
       , title = "Untitled Form"
       , description = ""
       , fields = fieldList
-      , nextIdx = List.length fieldList
+      , status = Loading
       }
-    , Cmd.none
+    , getFormTemplate (rootURL ++ "5db76d95e22235367394f83c")
     )
+
+
+rootURL : String
+rootURL =
+    "http://127.0.0.1:5000/forms-json/"
 
 
 
@@ -76,139 +91,191 @@ type Msg
     = ChangeName String
     | ChangeTitle String
     | ChangeDescription String
-    | AddField Int
-    | DuplicateField IndexedField
-    | DeleteField Int
-    | ModifyField Int FieldMsg
+    | AddField FE.Model
+    | DuplicateField FE.Model
+    | DeleteField FE.Model
+    | ModifyField FE.Model FieldMsg
+    | GotForm (Result Http.Error Model)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ChangeName name ->
-            ( { model | name = name }
-            , Cmd.none
+            let
+                newModel =
+                    { model
+                        | name = name
+                        , status = Loading
+                    }
+            in
+            ( newModel
+            , jsonBody (formMainInfoEncoder newModel)
+                |> sendFormTemplate (rootURL ++ newModel.id)
             )
 
         ChangeTitle title ->
-            ( { model | title = title }
-            , Cmd.none
+            let
+                newModel =
+                    { model
+                        | title = title
+                        , status = Loading
+                    }
+            in
+            ( newModel
+            , jsonBody (formMainInfoEncoder newModel)
+                |> sendFormTemplate (rootURL ++ newModel.id)
             )
 
         ChangeDescription description ->
-            ( { model | description = description }
-            , Cmd.none
+            let
+                newModel =
+                    { model
+                        | description = description
+                        , status = Loading
+                    }
+            in
+            ( newModel
+            , jsonBody (formMainInfoEncoder newModel)
+                |> sendFormTemplate (rootURL ++ newModel.id)
             )
 
-        AddField idx ->
+        AddField activeField ->
             let
-                newField : IndexedField
+                newField : FE.Model
                 newField =
-                    { idx = idx
-                    , field =
-                        { question = ""
-                        , description = ""
-                        , answerMethod = defaultAnswerMethod
-                        , required = False
-                        , expanded = False
-                        }
+                    { id = ""
+                    , index = activeField.index
+                    , question = ""
+                    , description = ""
+                    , answerMethod = defaultAnswerMethod
+                    , required = False
+                    , expanded = True
                     }
             in
             ( { model
-                | fields = List.map (switchFocus newField.idx) (insertField newField model.fields)
-                , nextIdx = model.nextIdx + 1
+                | fields = List.map (switchFocus newField.index) (insertField newField model.fields)
               }
-            , Cmd.none
+            , jsonBody (fieldEncoder newField)
+                |> sendFormTemplate (rootURL ++ model.id ++ "/add/" ++ newField.id)
             )
 
         DuplicateField activeField ->
             let
-                newField : IndexedField
+                newField : FE.Model
                 newField =
-                    { activeField | idx = activeField.idx + 1 }
+                    { activeField | index = activeField.index + 1 }
             in
             ( { model
-                | fields = List.map (switchFocus newField.idx) (insertField newField model.fields)
-                , nextIdx = model.nextIdx + 1
+                | fields = List.map (switchFocus newField.index) (insertField newField model.fields)
               }
-            , Cmd.none
+            , jsonBody (fieldEncoder newField)
+                |> sendFormTemplate (rootURL ++ model.id ++ "/duplicate/" ++ activeField.id)
             )
 
-        DeleteField idx ->
+        DeleteField activeField ->
             ( { model
-                | fields = List.map (switchFocus (idx - 1)) (deleteField idx model.fields)
-                , nextIdx = model.nextIdx - 1
+                | fields =
+                    List.map (switchFocus (activeField.index - 1))
+                        (deleteField activeField.index model.fields)
               }
-            , Cmd.none
+            , jsonBody (fieldEncoder activeField)
+                |> sendFormTemplate (rootURL ++ model.id ++ "/delete/" ++ activeField.id)
             )
 
-        ModifyField idx msg_ ->
+        ModifyField activeField msg_ ->
             case msg_ of
                 Expand ->
-                    ( { model | fields = List.map (switchFocus idx) model.fields }
+                    ( { model | fields = List.map (switchFocus activeField.index) model.fields }
                     , Cmd.none
                     )
 
                 _ ->
-                    ( { model | fields = List.map (modifyField idx msg_) model.fields }
+                    ( { model | fields = List.map (modifyField activeField.id msg_) model.fields }
+                    , Cmd.none
+                    )
+
+        GotForm result ->
+            case result of
+                Ok form ->
+                    ( form, Cmd.none )
+
+                Err err ->
+                    let
+                        _ =
+                            case err of
+                                Http.BadUrl bad ->
+                                    Debug.log "BadUrl" bad
+
+                                Http.Timeout ->
+                                    Debug.log "Timeout" ""
+
+                                Http.NetworkError ->
+                                    Debug.log "NetworkError" ""
+
+                                Http.BadStatus bad ->
+                                    Debug.log "BadStatus" String.fromInt bad
+
+                                Http.BadBody bad ->
+                                    Debug.log "BadBody" bad
+                    in
+                    ( { model | status = Failure }
                     , Cmd.none
                     )
 
 
-switchFocus : Int -> IndexedField -> IndexedField
-switchFocus targetIdx { idx, field } =
-    IndexedField
-        idx
-        (if targetIdx == idx then
-            let
-                _ =
-                    Debug.log "Idx " idx
-            in
-            updateField Expand field
+switchFocus : Int -> FE.Model -> FE.Model
+switchFocus targetIdx field =
+    if targetIdx == field.index then
+        updateField Expand field
 
-         else
-            updateField Collapse field
-        )
+    else
+        updateField Collapse field
 
 
-modifyField : Int -> FieldMsg -> IndexedField -> IndexedField
-modifyField targetIdx msg { idx, field } =
-    IndexedField
-        idx
-        (if targetIdx == idx then
-            updateField msg field
+modifyField : String -> FieldMsg -> FE.Model -> FE.Model
+modifyField targetId msg field =
+    if targetId == field.id then
+        updateField msg field
 
-         else
-            field
-        )
+    else
+        field
 
 
-insertField : IndexedField -> List IndexedField -> List IndexedField
+insertField : FE.Model -> List FE.Model -> List FE.Model
 insertField field fieldList =
     let
-        before : List IndexedField
+        before : List FE.Model
         before =
-            List.take field.idx fieldList
+            List.take field.index fieldList
 
-        after : List IndexedField
+        after : List FE.Model
         after =
-            List.map (\x -> { x | idx = x.idx + 1 }) (List.drop field.idx fieldList)
+            List.drop field.index fieldList
+                |> List.map (\x -> { x | index = x.index + 1 })
     in
     before ++ field :: after
 
 
-deleteField : Int -> List IndexedField -> List IndexedField
+deleteField : Int -> List FE.Model -> List FE.Model
 deleteField idx fieldList =
     let
-        before : List IndexedField
+        before : List FE.Model
         before =
             List.take idx fieldList
 
-        after : List IndexedField
+        after : List FE.Model
         after =
-            List.map (\x -> { x | idx = x.idx - 1 }) (List.drop (idx + 1) fieldList)
+            List.drop (idx + 1) fieldList
+                |> List.map (\x -> { x | index = x.index - 1 })
     in
     before ++ after
+
+
+getActiveField : List FE.Model -> Maybe FE.Model
+getActiveField fieldList =
+    List.filter (\x -> x.expanded) fieldList
+        |> List.head
 
 
 
@@ -217,6 +284,11 @@ deleteField idx fieldList =
 
 view : Model -> Html Msg
 view model =
+    viewForm model
+
+
+viewForm : Model -> Html Msg
+viewForm model =
     let
         formNavBar : Html Msg
         formNavBar =
@@ -227,23 +299,36 @@ view model =
                 , style "position" "sticky"
                 , style "top" "0.5rem"
                 , style "display" "flex"
-                , style "justify-content" "center"
+                , style "justify-content" "right"
                 , style "align-content" "center"
                 , style "padding" "1rem"
+                , style "margin-bottom" "2rem"
                 , onInput ChangeName
                 ]
                 [ input
                     [ value model.name
                     ]
                     []
-                , viewAddFieldButton (getActiveFieldIndex model.fields + 1)
+                , viewAddFieldButton (getActiveField model.fields)
+                , p [ style "margin-left" "2rem" ]
+                    [ case model.status of
+                        Loading ->
+                            text "Saving..."
+
+                        Success ->
+                            text "Up to date."
+
+                        Failure ->
+                            text "Something went wrong!"
+                    ]
                 ]
 
         titleField : Html Msg
         titleField =
             div
                 [ style "padding" "1rem"
-                , onClick (ModifyField -1 Expand)
+
+                --                , onClick (ModifyField -1 Expand)
                 ]
                 [ viewQuestion model.title ChangeTitle
                 , viewDescription model.description ChangeDescription
@@ -252,55 +337,42 @@ view model =
         fieldList : Html Msg
         fieldList =
             div
-                [ style "margin-top" "2rem"
-                ]
-                ([ fieldWrapper titleField ] ++ List.map viewIndexedField model.fields)
+                []
+                (List.map viewField model.fields)
     in
     div
         []
         [ formNavBar
+        , fieldWrapper titleField
         , fieldList
         ]
 
 
-getActiveFieldIndex : List IndexedField -> Int
-getActiveFieldIndex fieldList =
-    let
-        activeField : Maybe IndexedField
-        activeField =
-            List.head (List.filter (\x -> x.field.expanded) fieldList)
-    in
-    case activeField of
-        Nothing ->
-            List.length fieldList - 1
-
-        Just { idx, field } ->
-            idx
-
-
-viewIndexedField : IndexedField -> Html Msg
-viewIndexedField { idx, field } =
+viewField : FE.Model -> Html Msg
+viewField field =
     let
         fieldQuestion : Html Msg
         fieldQuestion =
-            viewQuestion field.question (ModifyField idx << ChangeQuestion)
+            viewQuestion field.question (ModifyField field << ChangeQuestion)
 
         fieldAnswerMethod : Html Msg
         fieldAnswerMethod =
             viewAnswerMethod field.answerMethod
                 field.expanded
-                (ModifyField idx ToggleMenu)
-                (ModifyField idx << ChangeAnswerMethod)
+                (ModifyField field ToggleMenu)
+                (ModifyField field << ChangeAnswerMethod)
 
         fieldDescription : Html Msg
         fieldDescription =
-            viewDescription field.description (ModifyField idx << FieldEditor.ChangeDescription)
+            ModifyField field
+                << FE.ChangeDescription
+                |> viewDescription field.description
 
         footerControls : Html Msg
         footerControls =
             div []
-                [ viewDuplicateFieldButton (IndexedField idx field)
-                , viewDeleteFieldButton idx
+                [ viewDuplicateFieldButton field
+                , viewDeleteFieldButton field
                 ]
 
         fieldBody : Html Msg
@@ -308,7 +380,7 @@ viewIndexedField { idx, field } =
             div
                 []
                 [ div
-                    [ onClick (ModifyField idx Expand)
+                    [ onClick (ModifyField field Expand)
                     , style "padding" "1rem"
                     ]
                     [ div
@@ -322,12 +394,10 @@ viewIndexedField { idx, field } =
                     ]
                 , viewControls field
                     (fieldFooter field
-                        (ModifyField idx << ChangeRequired)
+                        (ModifyField field << ChangeRequired)
                         footerControls
                     )
                 ]
-
-        --            Html.map (ModifyField idx) (viewField field)
     in
     fieldWrapper fieldBody
 
@@ -349,16 +419,66 @@ fieldWrapper content =
         ]
 
 
-viewAddFieldButton : Int -> Html Msg
-viewAddFieldButton idx =
-    button [ onClick (AddField idx) ] [ text "Add Field" ]
+viewAddFieldButton : Maybe FE.Model -> Html Msg
+viewAddFieldButton maybeField =
+    case maybeField of
+        Nothing ->
+            button [] [ text "Add Field" ]
+
+        Just field ->
+            button [ onClick (AddField field) ] [ text "Add Field" ]
 
 
-viewDeleteFieldButton : Int -> Html Msg
-viewDeleteFieldButton idx =
-    button [ onClick (DeleteField idx) ] [ text "Delete" ]
+viewDeleteFieldButton : FE.Model -> Html Msg
+viewDeleteFieldButton field =
+    button [ onClick (DeleteField field) ] [ text "Delete" ]
 
 
-viewDuplicateFieldButton : IndexedField -> Html Msg
+viewDuplicateFieldButton : FE.Model -> Html Msg
 viewDuplicateFieldButton field =
     button [ onClick (DuplicateField field) ] [ text "Duplicate" ]
+
+
+
+-- HTTP
+
+
+getFormTemplate : String -> Cmd Msg
+getFormTemplate url =
+    Http.get
+        { url = url
+        , expect = Http.expectJson GotForm formDecoder
+        }
+
+
+sendFormTemplate : String -> Http.Body -> Cmd Msg
+sendFormTemplate url data =
+    Http.post
+        { url = url
+        , body = data
+        , expect = Http.expectJson GotForm formDecoder
+        }
+
+
+
+-- JSON
+
+
+formMainInfoEncoder : Model -> JE.Value
+formMainInfoEncoder form =
+    JE.object
+        [ ( "name", JE.string form.name )
+        , ( "title", JE.string form.title )
+        , ( "description", JE.string form.description )
+        ]
+
+
+formDecoder : JD.Decoder Model
+formDecoder =
+    JD.succeed Model
+        |> required "_id" string
+        |> required "name" string
+        |> required "title" string
+        |> required "description" string
+        |> required "fields" (list fieldDecoder)
+        |> hardcoded Success

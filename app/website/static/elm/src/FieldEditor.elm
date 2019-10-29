@@ -4,6 +4,9 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as JD exposing (Decoder, andThen, bool, int, string)
+import Json.Decode.Pipeline as JDP exposing (hardcoded, optional, required)
+import Json.Encode as JE
 
 
 
@@ -37,7 +40,9 @@ type alias SelectedAnswerMethod =
 
 
 type alias Model =
-    { question : String
+    { id : String
+    , index : Int
+    , question : String
     , description : String
     , answerMethod : SelectedAnswerMethod
     , required : Bool
@@ -52,7 +57,9 @@ defaultAnswerMethod =
 
 init : Model
 init =
-    { question = "Test Field"
+    { id = ""
+    , index = -1
+    , question = "Test Field"
     , description = "This is some text to fill in the description are"
     , answerMethod = defaultAnswerMethod
     , required = False
@@ -233,8 +240,8 @@ viewMenuElement method selected changeMethod =
 
 
 getAnswerMethodName : AnswerMethod -> String
-getAnswerMethodName type_ =
-    case type_ of
+getAnswerMethodName method =
+    case method of
         ShortAnswer ->
             "Short Answer"
 
@@ -283,3 +290,60 @@ viewControls model footer =
                     [ text (getAnswerMethodName model.answerMethod.selected) ]
                 , footer
                 ]
+
+
+
+-- JSON
+
+
+fieldEncoder : Model -> JE.Value
+fieldEncoder field =
+    JE.object
+        [ ( "index", JE.int field.index )
+        , ( "question", JE.string field.question )
+        , ( "description", JE.string field.description )
+        , ( "required", JE.bool field.required )
+        , ( "input_type"
+          , field.answerMethod.selected
+                |> getAnswerMethodName
+                |> JE.string
+          )
+        ]
+
+
+fieldDecoder : JD.Decoder Model
+fieldDecoder =
+    JD.succeed Model
+        |> required "_id" string
+        |> required "index" int
+        |> optional "question" string ""
+        |> optional "description" string ""
+        |> required "input_type" answerMethodDecoder
+        |> optional "required" bool False
+        |> hardcoded False
+
+
+answerMethodDecoder : JD.Decoder SelectedAnswerMethod
+answerMethodDecoder =
+    string
+        |> andThen
+            (\method ->
+                case method of
+                    "Short Answer" ->
+                        JD.succeed <| SelectedAnswerMethod ShortAnswer False
+
+                    "Paragraph" ->
+                        JD.succeed <| SelectedAnswerMethod Paragraph False
+
+                    "Multiple Choice" ->
+                        JD.succeed <| SelectedAnswerMethod MultipleChoice False
+
+                    "Checkbox" ->
+                        JD.succeed <| SelectedAnswerMethod CheckBox False
+
+                    "Dropdown" ->
+                        JD.succeed <| SelectedAnswerMethod DropDown False
+
+                    _ ->
+                        JD.succeed <| SelectedAnswerMethod ShortAnswer False
+            )
