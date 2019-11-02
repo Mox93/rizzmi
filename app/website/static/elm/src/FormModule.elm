@@ -1,14 +1,15 @@
-module FormEditor exposing (..)
+module FormModule exposing (..)
 
 import Browser
-import FieldEditor as FE exposing (..)
+import FieldModule as FE exposing (..)
+import HTTP exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Http exposing (Body, jsonBody)
-import Json.Decode as JD exposing (Decoder, list, string)
-import Json.Decode.Pipeline as JDP exposing (hardcoded, required)
-import Json.Encode as JE
+import Http exposing (jsonBody)
+import JSON exposing (..)
+import MODEL exposing (..)
+import Utils exposing (..)
 
 
 
@@ -25,23 +26,7 @@ main =
 
 
 
--- MODEL
-
-
-type FormStatus
-    = Loading
-    | Success
-    | Failure
-
-
-type alias Model =
-    { id : String
-    , name : String
-    , title : String
-    , description : String
-    , fields : List FE.Model
-    , status : FormStatus
-    }
+-- INIT
 
 
 type alias MainInfo r =
@@ -52,18 +37,20 @@ type alias MainInfo r =
     }
 
 
-init : () -> ( Model, Cmd Msg )
+init : () -> ( Form, Cmd Msg )
 init _ =
     let
-        fieldList : List FE.Model
+        fieldList : List Field
         fieldList =
             [ { id = ""
+              , rootId = ""
               , index = 0
               , question = "Untitled Question"
               , description = ""
               , answerMethod = defaultAnswerMethod
               , required = False
               , expanded = True
+              , status = Loading
               }
             ]
     in
@@ -74,13 +61,8 @@ init _ =
       , fields = fieldList
       , status = Loading
       }
-    , getFormTemplate (rootURL ++ "5db76d95e22235367394f83c")
+    , getFormTemplate (rootURL ++ "5db76d95e22235367394f83c") GotForm
     )
-
-
-rootURL : String
-rootURL =
-    "http://127.0.0.1:5000/forms-json/"
 
 
 
@@ -91,18 +73,19 @@ type Msg
     = ChangeName String
     | ChangeTitle String
     | ChangeDescription String
-    | AddField FE.Model
-    | DuplicateField FE.Model
-    | DeleteField FE.Model
-    | ModifyField FE.Model FieldMsg
-    | GotForm (Result Http.Error Model)
+    | AddField Field
+    | DuplicateField Field
+    | DeleteField Field
+    | ModifyField Field FieldMsg
+    | GotForm (Result Http.Error Form)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Form -> ( Form, Cmd Msg )
 update msg model =
     case msg of
         ChangeName name ->
             let
+                newModel : Form
                 newModel =
                     { model
                         | name = name
@@ -110,12 +93,16 @@ update msg model =
                     }
             in
             ( newModel
-            , jsonBody (formMainInfoEncoder newModel)
+            , (jsonBody (formMainInfoEncoder newModel)
                 |> sendFormTemplate (rootURL ++ newModel.id)
+              )
+              <|
+                GotForm
             )
 
         ChangeTitle title ->
             let
+                newModel : Form
                 newModel =
                     { model
                         | title = title
@@ -123,12 +110,16 @@ update msg model =
                     }
             in
             ( newModel
-            , jsonBody (formMainInfoEncoder newModel)
+            , (jsonBody (formMainInfoEncoder newModel)
                 |> sendFormTemplate (rootURL ++ newModel.id)
+              )
+              <|
+                GotForm
             )
 
         ChangeDescription description ->
             let
+                newModel : Form
                 newModel =
                     { model
                         | description = description
@@ -136,41 +127,52 @@ update msg model =
                     }
             in
             ( newModel
-            , jsonBody (formMainInfoEncoder newModel)
+            , (jsonBody (formMainInfoEncoder newModel)
                 |> sendFormTemplate (rootURL ++ newModel.id)
+              )
+              <|
+                GotForm
             )
 
         AddField activeField ->
             let
-                newField : FE.Model
+                newField : Field
                 newField =
                     { id = ""
-                    , index = activeField.index
+                    , rootId = model.id
+                    , index = activeField.index + 1
                     , question = ""
                     , description = ""
                     , answerMethod = defaultAnswerMethod
                     , required = False
                     , expanded = True
+                    , status = Loading
                     }
             in
             ( { model
                 | fields = List.map (switchFocus newField.index) (insertField newField model.fields)
               }
-            , jsonBody (fieldEncoder newField)
+            , (jsonBody (fieldEncoder newField)
                 |> sendFormTemplate (rootURL ++ model.id ++ "/add/" ++ newField.id)
+              )
+              <|
+                GotForm
             )
 
         DuplicateField activeField ->
             let
-                newField : FE.Model
+                newField : Field
                 newField =
                     { activeField | index = activeField.index + 1 }
             in
             ( { model
                 | fields = List.map (switchFocus newField.index) (insertField newField model.fields)
               }
-            , jsonBody (fieldEncoder newField)
+            , (jsonBody (fieldEncoder newField)
                 |> sendFormTemplate (rootURL ++ model.id ++ "/duplicate/" ++ activeField.id)
+              )
+              <|
+                GotForm
             )
 
         DeleteField activeField ->
@@ -179,8 +181,11 @@ update msg model =
                     List.map (switchFocus (activeField.index - 1))
                         (deleteField activeField.index model.fields)
               }
-            , jsonBody (fieldEncoder activeField)
+            , (jsonBody (fieldEncoder activeField)
                 |> sendFormTemplate (rootURL ++ model.id ++ "/delete/" ++ activeField.id)
+              )
+              <|
+                GotForm
             )
 
         ModifyField activeField msg_ ->
@@ -224,32 +229,40 @@ update msg model =
                     )
 
 
-switchFocus : Int -> FE.Model -> FE.Model
+switchFocus : Int -> Field -> Field
 switchFocus targetIdx field =
-    if targetIdx == field.index then
-        updateField Expand field
+    let
+        ( fld, _ ) =
+            if targetIdx == field.index then
+                updateField Expand field
 
-    else
-        updateField Collapse field
+            else
+                updateField Collapse field
+    in
+    fld
 
 
-modifyField : String -> FieldMsg -> FE.Model -> FE.Model
+modifyField : String -> FieldMsg -> Field -> Field
 modifyField targetId msg field =
-    if targetId == field.id then
-        updateField msg field
+    let
+        ( fld, _ ) =
+            if targetId == field.id then
+                updateField msg field
 
-    else
-        field
+            else
+                updateField DoNothing field
+    in
+    fld
 
 
-insertField : FE.Model -> List FE.Model -> List FE.Model
+insertField : Field -> List Field -> List Field
 insertField field fieldList =
     let
-        before : List FE.Model
+        before : List Field
         before =
             List.take field.index fieldList
 
-        after : List FE.Model
+        after : List Field
         after =
             List.drop field.index fieldList
                 |> List.map (\x -> { x | index = x.index + 1 })
@@ -257,14 +270,14 @@ insertField field fieldList =
     before ++ field :: after
 
 
-deleteField : Int -> List FE.Model -> List FE.Model
+deleteField : Int -> List Field -> List Field
 deleteField idx fieldList =
     let
-        before : List FE.Model
+        before : List Field
         before =
             List.take idx fieldList
 
-        after : List FE.Model
+        after : List Field
         after =
             List.drop (idx + 1) fieldList
                 |> List.map (\x -> { x | index = x.index - 1 })
@@ -272,7 +285,7 @@ deleteField idx fieldList =
     before ++ after
 
 
-getActiveField : List FE.Model -> Maybe FE.Model
+getActiveField : List Field -> Maybe Field
 getActiveField fieldList =
     List.filter (\x -> x.expanded) fieldList
         |> List.head
@@ -282,12 +295,12 @@ getActiveField fieldList =
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Form -> Html Msg
 view model =
     viewForm model
 
 
-viewForm : Model -> Html Msg
+viewForm : Form -> Html Msg
 viewForm model =
     let
         formNavBar : Html Msg
@@ -303,7 +316,7 @@ viewForm model =
                 , style "align-content" "center"
                 , style "padding" "1rem"
                 , style "margin-bottom" "2rem"
-                , onInput ChangeName
+                , onChange ChangeName
                 ]
                 [ input
                     [ value model.name
@@ -348,7 +361,7 @@ viewForm model =
         ]
 
 
-viewField : FE.Model -> Html Msg
+viewField : Field -> Html Msg
 viewField field =
     let
         fieldQuestion : Html Msg
@@ -419,7 +432,7 @@ fieldWrapper content =
         ]
 
 
-viewAddFieldButton : Maybe FE.Model -> Html Msg
+viewAddFieldButton : Maybe Field -> Html Msg
 viewAddFieldButton maybeField =
     case maybeField of
         Nothing ->
@@ -429,56 +442,11 @@ viewAddFieldButton maybeField =
             button [ onClick (AddField field) ] [ text "Add Field" ]
 
 
-viewDeleteFieldButton : FE.Model -> Html Msg
+viewDeleteFieldButton : Field -> Html Msg
 viewDeleteFieldButton field =
     button [ onClick (DeleteField field) ] [ text "Delete" ]
 
 
-viewDuplicateFieldButton : FE.Model -> Html Msg
+viewDuplicateFieldButton : Field -> Html Msg
 viewDuplicateFieldButton field =
     button [ onClick (DuplicateField field) ] [ text "Duplicate" ]
-
-
-
--- HTTP
-
-
-getFormTemplate : String -> Cmd Msg
-getFormTemplate url =
-    Http.get
-        { url = url
-        , expect = Http.expectJson GotForm formDecoder
-        }
-
-
-sendFormTemplate : String -> Http.Body -> Cmd Msg
-sendFormTemplate url data =
-    Http.post
-        { url = url
-        , body = data
-        , expect = Http.expectJson GotForm formDecoder
-        }
-
-
-
--- JSON
-
-
-formMainInfoEncoder : Model -> JE.Value
-formMainInfoEncoder form =
-    JE.object
-        [ ( "name", JE.string form.name )
-        , ( "title", JE.string form.title )
-        , ( "description", JE.string form.description )
-        ]
-
-
-formDecoder : JD.Decoder Model
-formDecoder =
-    JD.succeed Model
-        |> required "_id" string
-        |> required "name" string
-        |> required "title" string
-        |> required "description" string
-        |> required "fields" (list fieldDecoder)
-        |> hardcoded Success

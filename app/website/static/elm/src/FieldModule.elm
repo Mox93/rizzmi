@@ -1,12 +1,14 @@
-module FieldEditor exposing (..)
+module FieldModule exposing (..)
 
 import Browser
+import HTTP exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode as JD exposing (Decoder, andThen, bool, int, string)
-import Json.Decode.Pipeline as JDP exposing (hardcoded, optional, required)
-import Json.Encode as JE
+import Http exposing (jsonBody)
+import JSON exposing (..)
+import MODEL exposing (..)
+import Utils exposing (..)
 
 
 
@@ -14,40 +16,16 @@ import Json.Encode as JE
 
 
 main =
-    Browser.sandbox
+    Browser.element
         { init = init
         , update = updateField
+        , subscriptions = \_ -> Sub.none
         , view = viewField
         }
 
 
 
--- MODEL
-
-
-type AnswerMethod
-    = ShortAnswer
-    | Paragraph
-    | MultipleChoice
-    | CheckBox
-    | DropDown
-
-
-type alias SelectedAnswerMethod =
-    { selected : AnswerMethod
-    , menuOpen : Bool
-    }
-
-
-type alias Model =
-    { id : String
-    , index : Int
-    , question : String
-    , description : String
-    , answerMethod : SelectedAnswerMethod
-    , required : Bool
-    , expanded : Bool
-    }
+-- INIT
 
 
 defaultAnswerMethod : SelectedAnswerMethod
@@ -55,16 +33,20 @@ defaultAnswerMethod =
     SelectedAnswerMethod ShortAnswer False
 
 
-init : Model
-init =
-    { id = ""
-    , index = -1
-    , question = "Test Field"
-    , description = "This is some text to fill in the description are"
-    , answerMethod = defaultAnswerMethod
-    , required = False
-    , expanded = False
-    }
+init : () -> ( Field, Cmd FieldMsg )
+init _ =
+    ( { id = ""
+      , rootId = ""
+      , index = -1
+      , question = "Test Field"
+      , description = "This is some text to fill in the description are"
+      , answerMethod = defaultAnswerMethod
+      , required = False
+      , expanded = False
+      , status = Loading
+      }
+    , Cmd.none
+    )
 
 
 
@@ -79,14 +61,17 @@ type FieldMsg
     | ChangeRequired Bool
     | ChangeQuestion String
     | ChangeDescription String
+    | GotField (Result Http.Error Field)
     | DoNothing
 
 
-updateField : FieldMsg -> Model -> Model
+updateField : FieldMsg -> Field -> ( Field, Cmd FieldMsg )
 updateField msg model =
     case msg of
         Expand ->
-            { model | expanded = True }
+            ( { model | expanded = True }
+            , Cmd.none
+            )
 
         Collapse ->
             let
@@ -94,43 +79,104 @@ updateField msg model =
                 menu =
                     model.answerMethod
             in
-            { model
+            ( { model
                 | expanded = False
                 , answerMethod = { menu | menuOpen = False }
-            }
+              }
+            , Cmd.none
+            )
 
         ChangeAnswerMethod method ->
             let
+                menu : SelectedAnswerMethod
                 menu =
                     model.answerMethod
+
+                newModel : Field
+                newModel =
+                    { model | answerMethod = { menu | selected = method } }
             in
-            { model | answerMethod = { menu | selected = method } }
+            ( newModel
+            , (jsonBody (fieldEncoder newModel)
+                |> sendFieldUpdate (rootURL ++ newModel.rootId ++ "/" ++ newModel.id)
+              )
+              <|
+                GotField
+            )
 
         ToggleMenu ->
             let
+                menu : SelectedAnswerMethod
                 menu =
                     model.answerMethod
             in
-            { model | answerMethod = { menu | menuOpen = not menu.menuOpen } }
+            ( { model | answerMethod = { menu | menuOpen = not menu.menuOpen } }
+            , Cmd.none
+            )
 
         ChangeRequired state ->
-            { model | required = state }
+            let
+                newModel : Field
+                newModel =
+                    { model | required = state }
+            in
+            ( newModel
+            , (jsonBody (fieldEncoder newModel)
+                |> sendFieldUpdate (rootURL ++ newModel.rootId ++ "/" ++ newModel.id)
+              )
+              <|
+                GotField
+            )
 
         ChangeQuestion question ->
-            { model | question = question }
+            let
+                newModel : Field
+                newModel =
+                    { model | question = question }
+            in
+            ( newModel
+            , (jsonBody (fieldEncoder newModel)
+                |> sendFieldUpdate (rootURL ++ newModel.rootId ++ "/" ++ newModel.id)
+              )
+              <|
+                GotField
+            )
 
         ChangeDescription description ->
-            { model | description = description }
+            let
+                newModel : Field
+                newModel =
+                    { model | description = description }
+            in
+            ( newModel
+            , (jsonBody (fieldEncoder newModel)
+                |> sendFieldUpdate (rootURL ++ newModel.rootId ++ "/" ++ newModel.id)
+              )
+              <|
+                GotField
+            )
+
+        GotField result ->
+            case result of
+                Ok field ->
+                    ( field, Cmd.none )
+
+                Err _ ->
+                    ( { model | status = Failure }
+                    , Cmd.none
+                    )
 
         DoNothing ->
-            model
+            ( model
+            , Cmd.none
+            )
 
 
 
 -- VIEW
 
 
-viewField : Model -> Html FieldMsg
+viewField : Field -> Html FieldMsg
 viewField model =
     div
         []
@@ -154,7 +200,7 @@ viewQuestion question changeText =
         [ placeholder "Question"
         , value question
         , style "width" "70%"
-        , onInput changeText
+        , onChange changeText
         ]
         []
 
@@ -179,7 +225,7 @@ viewDescription description changeText =
         [ placeholder "Description"
         , style "width" "70%"
         , style "overflow" "break-word"
-        , onInput changeText
+        , onChange changeText
         ]
         [ text description ]
 
@@ -239,26 +285,7 @@ viewMenuElement method selected changeMethod =
         [ text (getAnswerMethodName method) ]
 
 
-getAnswerMethodName : AnswerMethod -> String
-getAnswerMethodName method =
-    case method of
-        ShortAnswer ->
-            "Short Answer"
-
-        Paragraph ->
-            "Paragraph"
-
-        MultipleChoice ->
-            "Multiple Choice"
-
-        CheckBox ->
-            "Checkbox"
-
-        DropDown ->
-            "Dropdown"
-
-
-fieldFooter : Model -> (Bool -> msg) -> Html msg -> Html msg
+fieldFooter : Field -> (Bool -> msg) -> Html msg -> Html msg
 fieldFooter model msg controls =
     div
         [ style "display" "flex"
@@ -277,7 +304,7 @@ fieldFooter model msg controls =
         ]
 
 
-viewControls : Model -> Html msg -> Html msg
+viewControls : Field -> Html msg -> Html msg
 viewControls model footer =
     case model.expanded of
         False ->
@@ -290,60 +317,3 @@ viewControls model footer =
                     [ text (getAnswerMethodName model.answerMethod.selected) ]
                 , footer
                 ]
-
-
-
--- JSON
-
-
-fieldEncoder : Model -> JE.Value
-fieldEncoder field =
-    JE.object
-        [ ( "index", JE.int field.index )
-        , ( "question", JE.string field.question )
-        , ( "description", JE.string field.description )
-        , ( "required", JE.bool field.required )
-        , ( "input_type"
-          , field.answerMethod.selected
-                |> getAnswerMethodName
-                |> JE.string
-          )
-        ]
-
-
-fieldDecoder : JD.Decoder Model
-fieldDecoder =
-    JD.succeed Model
-        |> required "_id" string
-        |> required "index" int
-        |> optional "question" string ""
-        |> optional "description" string ""
-        |> required "input_type" answerMethodDecoder
-        |> optional "required" bool False
-        |> hardcoded False
-
-
-answerMethodDecoder : JD.Decoder SelectedAnswerMethod
-answerMethodDecoder =
-    string
-        |> andThen
-            (\method ->
-                case method of
-                    "Short Answer" ->
-                        JD.succeed <| SelectedAnswerMethod ShortAnswer False
-
-                    "Paragraph" ->
-                        JD.succeed <| SelectedAnswerMethod Paragraph False
-
-                    "Multiple Choice" ->
-                        JD.succeed <| SelectedAnswerMethod MultipleChoice False
-
-                    "Checkbox" ->
-                        JD.succeed <| SelectedAnswerMethod CheckBox False
-
-                    "Dropdown" ->
-                        JD.succeed <| SelectedAnswerMethod DropDown False
-
-                    _ ->
-                        JD.succeed <| SelectedAnswerMethod ShortAnswer False
-            )
