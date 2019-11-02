@@ -64,18 +64,18 @@ def is_safe_url(target):
     return test_url.scheme in ("http", "https") and refer_url.netloc == test_url.netloc
 
 
-INPUT_TYPES = ["Short answer",
+INPUT_TYPES = ["Short Answer",
                "Paragraph",
                ##################
-               "Multiple choice",
+               "Multiple Choice",
                "Checkbox",
                "Dropdown",
                ##################
-               "File upload",
+               "File Upload",
                ##################
-               "Linear scale",
-               "Multiple choice grid",
-               "Checkbox grid",
+               "Linear Scale",
+               "Multiple Choice Grid",
+               "Checkbox Grid",
                ##################
                "Date",
                "Time"]

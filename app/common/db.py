@@ -9,6 +9,7 @@ class ExtendedDocument(db.Document):
     """
     The base for all documents in the project
     Contains the following additional features:
+        - _id:              an ObjectId
         - creation_date:    the time the document was created  ## UTC
         - modified_date:    the last time the document was modified  ## UTC
         - json:             returns a dict-like representation of the document
@@ -20,6 +21,7 @@ class ExtendedDocument(db.Document):
 
     meta = {"abstract": True}
 
+    _id = db.ObjectIdField(required=True, default=ObjectId)
     creation_date = db.DateTimeField()
     modified_date = db.DateTimeField(default=datetime.utcnow)
 
@@ -32,26 +34,32 @@ class ExtendedDocument(db.Document):
     def json(self, exclude=tuple()):
         result = self.to_mongo()
 
+        pass_on = []
+
         for key in exclude:
             if key in result:
                 del result[key]
+            else:
+                pass_on.append(key)
 
         for key in result:
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
-                result[key] = self[key].json()
+                result[key] = self[key].json(exclude=pass_on)
             elif isinstance(self[key], list):
                 for i, item in enumerate(self[key]):
-                    if isinstance(item, db.EmbeddedDocument):
-                        result[key][i] = item.json()
+                    if isinstance(result[key][i], ObjectId):
+                        result[key][i] = str(result[key][i])
+                    elif isinstance(item, db.EmbeddedDocument):
+                        result[key][i] = item.json(exclude=pass_on)
 
         return result
 
     @classmethod
     def find_by_id(cls, _id):
         try:
-            return cls.objects(id=_id).first()
+            return cls.objects(_id=_id).first()
         except Exception as e:
             print(str(e))
             return
@@ -68,8 +76,8 @@ class ExtendedDocument(db.Document):
     def find_many_by(cls, field_name, value, sort_keys=tuple()):
         try:
             if sort_keys and isinstance(sort_keys, (tuple, list, set)):
-                return cls.objects(**{field_name: value}).order_by(*sort_keys)
-            return cls.objects(**{field_name: value})
+                return list(cls.objects(**{field_name: value}).order_by(*sort_keys))
+            return list(cls.objects(**{field_name: value}))
         except Exception as e:
             print(str(e))
             return []
@@ -78,8 +86,8 @@ class ExtendedDocument(db.Document):
     def find_all(cls, sort_keys=tuple()):
         try:
             if sort_keys and isinstance(sort_keys, (tuple, list, set)):
-                return cls.objects().order_by(*sort_keys)
-            return cls.objects()
+                return list(cls.objects().order_by(*sort_keys))
+            return list(cls.objects())
         except Exception as e:
             print(str(e))
             return []
@@ -120,19 +128,25 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
     def json(self, exclude=tuple()):
         result = self.to_mongo()
 
+        pass_on = []
+
         for key in exclude:
             if key in result:
                 del result[key]
+            else:
+                pass_on.append(key)
 
         for key in result:
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
-                result[key] = self[key].json()
+                result[key] = self[key].json(exclude=pass_on)
             elif isinstance(self[key], list):
                 for i, item in enumerate(self[key]):
-                    if isinstance(item, db.EmbeddedDocument):
-                        result[key][i] = item.json()
+                    if isinstance(result[key][i], ObjectId):
+                        result[key][i] = str(result[key][i])
+                    elif isinstance(item, db.EmbeddedDocument):
+                        result[key][i] = item.json(exclude=pass_on)
 
         return result
 
@@ -156,8 +170,8 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
     def find_many_by(cls, field_name, value, sort_keys=tuple()):
         try:
             if sort_keys and isinstance(sort_keys, (tuple, list, set)):
-                return cls.objects(**{field_name: value}).order_by(*sort_keys)
-            return cls.objects(**{field_name: value})
+                return list(cls.objects(**{field_name: value}).order_by(*sort_keys))
+            return list(cls.objects(**{field_name: value}))
         except Exception as e:
             print(str(e))
             return []
@@ -166,8 +180,8 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
     def find_all(cls, sort_keys=tuple()):
         try:
             if sort_keys and isinstance(sort_keys, (tuple, list, set)):
-                return cls.objects().order_by(*sort_keys)
-            return cls.objects()
+                return list(cls.objects().order_by(*sort_keys))
+            return list(cls.objects())
         except Exception as e:
             print(str(e))
             return []

@@ -13,7 +13,7 @@ Bootstrap(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "dev.login"
 
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 
 
 @login_manager.user_loader
@@ -54,3 +54,8 @@ from developer import dev_bp
 app.register_blueprint(site_bp)
 app.register_blueprint(dev_bp, url_prefix="/dev")
 
+
+from flask_graphql import GraphQLView
+from gql_api import schema
+
+app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))

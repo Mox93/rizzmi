@@ -1,8 +1,12 @@
 Flask==1.1.1
 Flask-Admin==1.5.3
 Flask-Bootstrap==3.3.7.1
+<<<<<<< HEAD
 Flask-Login==0.4.1
+||||||| merged common ancestors
+=======
 Flask-GraphQL==2.0.0
+>>>>>>> website
 flask-mongoengine==0.9.5
 Flask-RESTful==0.3.7
 Flask-WTF==0.14.2

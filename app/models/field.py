@@ -34,7 +34,7 @@ class FieldModel(ExtendedDocument):
     question = db.StringField(max_length=500)
     data_type = db.StringField(required=True, choices=DTYPES.keys(), default="dynamic")
     input_type = db.StringField(choices=INPUT_TYPES, default=INPUT_TYPES[0])
-    required = db.BooleanField()
+    required = db.BooleanField(required=True, default=False)
     unique = db.BooleanField()
     unique_with = db.DynamicField()
     primary_key = db.BooleanField()
@@ -108,7 +108,7 @@ class FieldModel(ExtendedDocument):
         if not cls._embedded:
 
             cls._embedded = type("EmbeddedFieldModel", (ExtendedEmbeddedDocument,),
-                                 {"order": db.IntField(required=True, default=-1),
+                                 {"index": db.IntField(required=True, default=-1),
                                   "question": cls.question,
                                   "data_type": cls.data_type,
                                   "input_type": cls.input_type,

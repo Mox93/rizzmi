@@ -48,8 +48,9 @@ class FormTemplateModel(ExtendedDocument):
         # TODO the collection of native fields and foreign fields point at two different things
 
         print(f"***{self.collections}")
-        for field in self.fields:
+        for i, field in enumerate(self.fields):
             print(f">>> {field.collection}")
+            field.index = i
 
             if not field.collection:
                 print("Didn't have a collection")
@@ -70,7 +71,7 @@ class FormTemplateModel(ExtendedDocument):
                 field.collection = self.default_collection._id
                 if field._id in self.foreign_fields_id:
                     self.foreign_fields_id.remove(field._id)
-        
+
         for collection in self.collections:
             for field in collection.fetch().fields:
                 if field._id not in self.foreign_fields_id:
