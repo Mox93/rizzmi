@@ -34,7 +34,7 @@ class FieldModel(ExtendedDocument):
     question = db.StringField(max_length=500)
     data_type = db.StringField(required=True, choices=DTYPES.keys(), default="dynamic")
     input_type = db.StringField(choices=INPUT_TYPES, default=INPUT_TYPES[0])
-    required = db.BooleanField()
+    required = db.BooleanField(required=True, default=False)
     unique = db.BooleanField()
     unique_with = db.DynamicField()
     primary_key = db.BooleanField()

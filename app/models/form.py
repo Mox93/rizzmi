@@ -47,36 +47,36 @@ class FormTemplateModel(ExtendedDocument):
         # TODO checking which field belongs to which form/collection shouldn't be done here
         # TODO the collection of native fields and foreign fields point at two different things
 
-        # print(f"***{self.collections}")
-        # for i, field in enumerate(self.fields):
-        #     print(f">>> {field.collection}")
-        #     field.index = i
-        #
-        #     if not field.collection:
-        #         print("Didn't have a collection")
-        #         field.collection = self.default_collection._id
-        #
-        #     elif field.collection == self.default_collection._id:
-        #         print("Had the default collection")
-        #         if field._id in self.foreign_fields_id:
-        #             self.foreign_fields_id.remove(field._id)
-        #
-        #     elif field.collection in self.collections:  # This is looking in the wrong place
-        #         print("Had a foreign collection")
-        #         if field._id not in self.foreign_fields_id:
-        #             self.foreign_fields_id.append(field._id)
-        #
-        #     else:
-        #         print("Had something else")
-        #         field.collection = self.default_collection._id
-        #         if field._id in self.foreign_fields_id:
-        #             self.foreign_fields_id.remove(field._id)
-        #
-        # for collection in self.collections:
-        #     for field in collection.fetch().fields:
-        #         if field._id not in self.foreign_fields_id:
-        #             self.fields.append(field)
-        #             self.foreign_fields.append(field._id)
+        print(f"***{self.collections}")
+        for i, field in enumerate(self.fields):
+            print(f">>> {field.collection}")
+            field.index = i
+
+            if not field.collection:
+                print("Didn't have a collection")
+                field.collection = self.default_collection._id
+
+            elif field.collection == self.default_collection._id:
+                print("Had the default collection")
+                if field._id in self.foreign_fields_id:
+                    self.foreign_fields_id.remove(field._id)
+
+            elif field.collection in self.collections:  # This is looking in the wrong place
+                print("Had a foreign collection")
+                if field._id not in self.foreign_fields_id:
+                    self.foreign_fields_id.append(field._id)
+
+            else:
+                print("Had something else")
+                field.collection = self.default_collection._id
+                if field._id in self.foreign_fields_id:
+                    self.foreign_fields_id.remove(field._id)
+
+        for collection in self.collections:
+            for field in collection.fetch().fields:
+                if field._id not in self.foreign_fields_id:
+                    self.fields.append(field)
+                    self.foreign_fields.append(field._id)
 
         if isinstance(self.name, str):
             n = FormTemplateModel.name.max_length
