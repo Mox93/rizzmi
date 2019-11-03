@@ -1,21 +1,13 @@
 from graphene import (Schema, ObjectType, List, Field, ID)
-from gql_api.form import FormType, CreateForm
-from gql_api.field import (FieldType, EmbeddedFieldType,
-                           CreateField, AddField,
-                           UpdateField, EditField,
-                           DeleteField)
+from gql_api.form import FormType, FormOps
+from gql_api.field import FieldType, FieldOps, EmbeddedFieldType
 from models.form import FormTemplateModel
 from models.field import FieldModel
 
 
 class MutationType(ObjectType):
-    new_field = CreateField.Field()
-    add_field = AddField.Field()
-    update_field = UpdateField.Field()
-    edit_field = EditField.Field()
-    delete_field = DeleteField.Field()
-
-    new_form = CreateForm.Field()
+    field_ops = FieldOps.Field()
+    form_ops = FormOps.Field()
 
 
 class QueryType(ObjectType):

@@ -21,7 +21,7 @@ class ExtendedDocument(db.Document):
 
     meta = {"abstract": True}
 
-    _id = db.ObjectIdField(required=True, default=ObjectId)
+    _id = db.ObjectIdField(primary_key=True, required=True, default=ObjectId)
     creation_date = db.DateTimeField()
     modified_date = db.DateTimeField(default=datetime.utcnow)
 

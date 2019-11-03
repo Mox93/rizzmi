@@ -2,6 +2,7 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mongoengine import MongoEngineSessionInterface
+from flask_wtf.csrf import CSRFProtect
 from models.user import DeveloperModel
 
 
