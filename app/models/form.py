@@ -85,6 +85,8 @@ class FormTemplateModel(ExtendedDocument):
         if isinstance(self.title, str):
             n = FormTemplateModel.title.max_length
             self.title = self.title.strip()[:n] or self.name
+        elif not self.title and self.name != FormTemplateModel.name.default:
+            self.title = self.name
 
         if self.name != FormTemplateModel.name.default and self.default_collection.name == Connection.name.default:
             self.default_collection.name = self.name
