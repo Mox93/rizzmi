@@ -1,6 +1,6 @@
 from graphene import (ObjectType, Interface, Mutation, InputObjectType,
                       String, Int, Boolean, DateTime, ID, List, Field, InputField)
-from models.field import FieldModel, EmbeddedFieldModel
+from models.field import FieldModel
 from models.form import FormTemplateModel
 
 
@@ -11,7 +11,7 @@ class CommonAttributes(object):
     input_type = String()
 
 
-class CommonFieldAttributes(CommonAttributes, Interface):
+class FieldInterface(CommonAttributes, Interface):
     _id = ID()
 
 
@@ -22,7 +22,7 @@ class FieldType(ObjectType):
     class Meta:
         name = "Field"
         description = "..."
-        interfaces = (CommonFieldAttributes,)
+        interfaces = (FieldInterface,)
 
     creation_date = DateTime()
     modified_date = DateTime()
@@ -86,9 +86,9 @@ class FieldOps(Mutation):
             field = FormTemplateModel.find_by_id(update.field_id)
 
             try:
-                for atr in update.field_data:
+                for atr, val in update.field_data.items():
                     if hasattr(field, atr):
-                        setattr(field, atr, update.field_data[atr])
+                        setattr(field, atr, val)
                 field.save()
                 ok = True
             except Exception as e:
@@ -119,7 +119,7 @@ class EmbeddedFieldType(ObjectType):
     class Meta:
         name = "EmbeddedField"
         description = "..."
-        interfaces = (CommonFieldAttributes,)
+        interfaces = (FieldInterface,)
 
     index = Int()
     collection = ID()

@@ -31,28 +31,28 @@ class ExtendedDocument(db.Document):
         self.modified_date = datetime.utcnow()
         return super(ExtendedDocument, self).save(*args, **kwargs)
 
-    def json(self, exclude=tuple()):
+    def json(self, exclude=tuple(), only=tuple()):
         result = self.to_mongo()
 
-        pass_on = []
+        exclude_pass_on = []
 
         for key in exclude:
             if key in result:
                 del result[key]
             else:
-                pass_on.append(key)
+                exclude_pass_on.append(key)
 
         for key in result:
             if isinstance(result[key], ObjectId):
                 result[key] = str(result[key])
             elif isinstance(self[key], db.EmbeddedDocument):
-                result[key] = self[key].json(exclude=pass_on)
+                result[key] = self[key].json(exclude=exclude_pass_on)
             elif isinstance(self[key], list):
                 for i, item in enumerate(self[key]):
                     if isinstance(result[key][i], ObjectId):
                         result[key][i] = str(result[key][i])
                     elif isinstance(item, db.EmbeddedDocument):
-                        result[key][i] = item.json(exclude=pass_on)
+                        result[key][i] = item.json(exclude=exclude_pass_on)
 
         return result
 
@@ -125,7 +125,7 @@ class ExtendedEmbeddedDocument(db.EmbeddedDocument):
 
     _id = db.ObjectIdField(required=True, default=ObjectId)
 
-    def json(self, exclude=tuple()):
+    def json(self, exclude=tuple(), only=tuple()):
         result = self.to_mongo()
 
         pass_on = []

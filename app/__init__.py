@@ -1,19 +1,17 @@
 from flask import Flask
-from flask_bootstrap import Bootstrap
+from flask_cors import CORS
 from flask_login import LoginManager
 from flask_mongoengine import MongoEngineSessionInterface
-from flask_wtf.csrf import CSRFProtect
+from flask_jwt_extended import JWTManager
 from models.user import DeveloperModel
 
 
 app = Flask(__name__)
 
-Bootstrap(app)
+CORS(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "dev.login"
-
-# csrf = CSRFProtect(app)
 
 
 @login_manager.user_loader
@@ -29,8 +27,9 @@ app.config["TESTING"] = True
 import secrets
 
 app.config["SECRET_KEY"] = secrets.token_urlsafe(24)
-# app.config["SERVER_NAME"] = "127.0.0.1:5000"
-# app.config["APPLICATION_ROOT"] = "/"
+app.config['JWT_SECRET_KEY'] = secrets.token_urlsafe(24)
+
+jwt = JWTManager(app)
 
 
 from common.db import db, DB_NAME, PORT, HOST
@@ -61,5 +60,7 @@ app.register_blueprint(dev_bp, url_prefix="/dev")
 
 from flask_graphql import GraphQLView
 from gql_api import schema
+from gql_api.auth import add_claims_to_access_token, user_identity_lookup
 
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True))
+

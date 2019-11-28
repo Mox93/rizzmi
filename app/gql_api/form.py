@@ -15,7 +15,7 @@ class CommonAttributes(object):
 ######################################################################
 
 
-class CommonFormAttributes(CommonAttributes, Interface):
+class FormInterface(CommonAttributes, Interface):
     _id = ID()
     creation_date = DateTime()
     modified_date = DateTime()
@@ -34,7 +34,7 @@ class FormType(ObjectType):
     class Meta:
         name = "Form"
         description = "..."
-        interfaces = (CommonFormAttributes,)
+        interfaces = (FormInterface,)
 
 
 ######################################################################
@@ -100,9 +100,9 @@ class FormOps(Mutation):
             form = FormTemplateModel.find_by_id(update.form_id)
 
             try:
-                for atr in update.form_data:
+                for atr, val in update.form_data.items():
                     if hasattr(form, atr) and atr != "fields":
-                        setattr(form, atr, update.form_data[atr])
+                        setattr(form, atr, val)
                 form.save()
                 ok = True
             except Exception as e:
@@ -135,9 +135,9 @@ class FormOps(Mutation):
                     form.fields.remove(field)
                     form.fields.insert(index, field)
 
-                for atr in edit_field.field_data:
+                for atr, val in edit_field.field_data.items():
                     if hasattr(field, atr):
-                        setattr(field, atr, edit_field.field_data[atr])
+                        setattr(field, atr, val)
 
                 form.save()
                 ok = True
