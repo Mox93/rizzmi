@@ -1,6 +1,7 @@
 .idea/*
 .rizzmi_env/*
 data/*
-/**/__pycache__/*
+**/__pycache__/*
 x/*
+client_app/*
 
