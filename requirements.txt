@@ -6,6 +6,6 @@ Flask-JWT-Extended==3.24.1
 Flask-RESTful==0.3.7
 Flask-WTF==0.14.2
 graphene==2.1.8
-Werkzeug==0.15.5
+Werkzeug==2.2.3
 WTForms==2.2.1
 uwsgi
